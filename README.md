@@ -1,3 +1,23 @@
+# D-SIGN DESIGNERS v4.0
+
+This React/Vite website now includes a branded splash screen, light/dark modes, configurable lobby music, Vercel Analytics, and a secure separate `/admin` content management workspace.
+
+**Start here:** Read [`V4_UPGRADE_GUIDE.md`](V4_UPGRADE_GUIDE.md) for patch instructions, and [`ADMIN_SETUP.md`](ADMIN_SETUP.md) for the one-time Supabase database, storage, and admin user setup. Without Supabase, the public website continues to work with the existing bundled content. There are **no hard-coded admin credentials**.
+
+## Local commands
+
+```powershell
+npm.cmd install
+npm.cmd run check:assets
+npm.cmd run check:v4
+npm.cmd run build
+npm.cmd run dev
+```
+
+Public site: `http://localhost:5173/` · Admin login: `http://localhost:5173/admin`
+
+---
+
 # Latest upgrade: v3.2 — Vercel Web Analytics (23 November 2026)
 
 Added Vercel Web Analytics for visitor and page-view insights. See **VERCEL_ANALYTICS_SETUP.md** for installation, enabling analytics in the Vercel dashboard, and verification. The previous logo, gallery, and ambient music behavior remain unchanged.

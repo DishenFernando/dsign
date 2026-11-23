@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import {
   ArrowDown, ArrowRight, ArrowUpRight, BadgeCheck, Check, ChevronDown, ChevronLeft, ChevronRight,
   Cloud, Code2, Compass, Database, Globe2, Headphones,
@@ -6,11 +6,19 @@ import {
   Palette, Phone, Rocket, Search, ShieldCheck, ShoppingBag,
   Sparkles, TrendingUp, X, Zap, Volume2, VolumeX
 } from 'lucide-react';
+import { DEFAULT_CONTENT, mergeContent } from './siteDefaults';
+import { loadWebsiteData } from './lib/siteData';
+import { ThemeToggle } from './components/ThemeToggle';
+import SplashScreen from './components/SplashScreen';
 
-const BUSINESS_PHONE = '070 118 8941';
-const WHATSAPP_NUMBER = '94701188941';
-const whatsappLink = (text = 'Hello D-SIGN DESIGNERS! I would like to discuss a website project.') =>
-  `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
+const SiteContext = createContext({ content: DEFAULT_CONTENT, projects: null });
+const useSite = () => useContext(SiteContext);
+const whatsappLinkFor = (number, text = 'Hello D-SIGN DESIGNERS! I would like to discuss a website project.') =>
+  `https://wa.me/${String(number || '94701188941').replace(/\D/g, '')}?text=${encodeURIComponent(text)}`;
+function useWhatsApp() {
+  const { content } = useSite();
+  return (text) => whatsappLinkFor(content.site.whatsapp, text);
+}
 
 const menuItems = [
   { label: 'Home', href: '#home' },
@@ -19,37 +27,6 @@ const menuItems = [
   { label: 'Approach', href: '#process' },
   { label: 'About', href: '#about' },
   { label: 'FAQs', href: '#faq' },
-];
-
-const services = [
-  {
-    number: '01', icon: Monitor, name: 'Marketing Websites',
-    category: 'FOR BRANDS & BUSINESSES',
-    description: 'Considered design, clear messaging, and conversion-focused pages that make a powerful first impression.',
-    tags: ['Business websites', 'Landing pages', 'Portfolio websites'],
-    tone: 'blue', image: '/images/concepts/modern-residence.webp'
-  },
-  {
-    number: '02', icon: ShoppingBag, name: 'E-commerce Websites',
-    category: 'FOR THE NEXT BIG SALE',
-    description: 'Fast, intuitive storefronts designed to make browsing easier and the buying experience more enjoyable.',
-    tags: ['Product catalogues', 'Store management', 'Checkout integrations'],
-    tone: 'violet', image: '/images/concepts/everyday-objects.webp'
-  },
-  {
-    number: '03', icon: Code2, name: 'Custom Web Applications',
-    category: 'BUILT AROUND YOUR WORKFLOW',
-    description: 'Purpose-built portals, dashboards and web systems that solve real business problems.',
-    tags: ['Admin dashboards', 'Client portals', 'API integrations'],
-    tone: 'cyan', image: '/images/concepts/luminous-platform.webp'
-  }
-];
-
-const promises = [
-  { icon: ShieldCheck, title: 'Security-minded', detail: 'Thoughtful validation, access controls and security-conscious implementation.' },
-  { icon: Search, title: 'SEO foundations', detail: 'Metadata, clean structure and search-friendly best practices from day one.' },
-  { icon: Zap, title: 'Fast & responsive', detail: 'Mobile-first layouts and performance-conscious implementation.' },
-  { icon: Cloud, title: 'Launch & aftercare', detail: 'Domain guidance, hosting setup and clearly scoped support after launch.' },
 ];
 
 // These are fictional design concepts. Do not relabel them as client projects.
@@ -65,31 +42,17 @@ const projects = [
   { number: '09', title: 'Cloudline Console', type: 'Web Apps', subtitle: 'Business management workspace', category: 'SaaS interface concept', image: '/images/concepts/cloud-workspace.webp', description: 'A streamlined workspace direction for everyday business operations.', features: ['Modular components', 'Organised information', 'Scalable interface patterns'] }
 ];
 
-const steps = [
-  { index: '01', name: 'Discover', copy: 'We listen, define the goals, and understand your business and audience.', icon: Compass },
-  { index: '02', name: 'Design', copy: 'We shape the experience, content structure, and interface direction.', icon: Palette },
-  { index: '03', name: 'Develop', copy: 'We turn the approved direction into a responsive, reliable website.', icon: Code2 },
-  { index: '04', name: 'Launch & grow', copy: 'We check, deploy, hand over, and discuss what comes next.', icon: Rocket },
-];
-
-const faqs = [
-  { question: 'Do you build websites for small businesses and startups?', answer: 'Absolutely. We work with projects of different sizes, from a focused landing page or company website to a full online store or bespoke web application. The scope is tailored to your requirements.' },
-  { question: 'Can you help with domain names and hosting?', answer: 'Yes. We can guide you through domain registration, hosting selection, DNS, SSL setup and deployment. Domain and hosting fees are quoted separately when applicable, so you retain visibility and ownership.' },
-  { question: 'Will the website work on phones and tablets?', answer: 'Responsive design is part of our development approach. Layouts are adapted for phones, tablets and larger screens, with usability and accessibility considered throughout.' },
-  { question: 'Do you include SEO and security?', answer: 'We implement practical SEO foundations and security-minded development practices based on the agreed scope. Search rankings and complete freedom from security vulnerabilities cannot be guaranteed.' },
-  { question: 'What happens after the website goes live?', answer: 'We can provide handover guidance, issue fixes within the agreed warranty scope, and optional ongoing maintenance. Your proposal will explain what is included and what is billed separately.' },
-  { question: 'How much does a website cost?', answer: 'Pricing depends on pages, features, integrations, content, design complexity and hosting requirements. Share a quick outline through the enquiry form and we can provide a tailored quotation.' },
-];
-
 const initialQuote = {
   name: '', business: '', phone: '', projectType: 'Marketing / Business website',
   budget: 'Need guidance', timeframe: 'Flexible', details: ''
 };
 
 function Logo({ compact = false }) {
+  const { content, theme } = useSite();
+  const brandSrc = theme === 'light' && content.site.logo_url === '/dsign-logo-dark.png' ? '/dsign-logo-original.png' : content.site.logo_url;
   return (
     <a className={`brand ${compact ? 'brand-compact' : ''}`} href="#home" aria-label="D-SIGN DESIGNERS, back to top">
-      <img src="/dsign-logo-dark.png" alt="D-SIGN DESIGNERS" width="1330" height="542" decoding="async" />
+      <img src={brandSrc || "/dsign-logo-dark.png"} alt="D-SIGN DESIGNERS" width="1330" height="542" decoding="async" />
     </a>
   );
 }
@@ -116,7 +79,7 @@ function SectionHeading({ eyebrow, title, emphasis, text, light = false }) {
   );
 }
 
-function Header({ activeSection }) {
+function Header({ activeSection, theme, setTheme }) {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const menuButtonRef = useRef(null);
@@ -173,7 +136,7 @@ function Header({ activeSection }) {
           ))}
           <a className="mobile-nav-contact" href="#contact" onClick={closeMenu}>Start a project <ArrowUpRight size={17} /></a>
         </nav>
-        <a href="#contact" className="header-contact">Let's talk <ArrowUpRight size={17} /></a>
+        <div className="header-actions"><ThemeToggle theme={theme} onChange={setTheme} compact/><a href="#contact" className="header-contact">Let's talk <ArrowUpRight size={17} /></a></div>
         <button ref={menuButtonRef} type="button" className="menu-toggle" onClick={() => setIsOpen(!isOpen)} aria-expanded={isOpen} aria-controls="main-navigation" aria-label={isOpen ? 'Close menu' : 'Open menu'}>
           {isOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
@@ -216,22 +179,22 @@ function BrowserMockup() {
 }
 
 function Hero() {
+  const { content } = useSite();
+  const hero = content.hero;
   return (
     <section className="hero section-dark" id="home" aria-labelledby="hero-title">
       <div className="hero-noise" aria-hidden="true" /><div className="hero-orb hero-orb-one" aria-hidden="true" /><div className="hero-orb hero-orb-two" aria-hidden="true" />
       <div className="hero-grid container">
         <div className="hero-content">
-          <div className="hero-topline"><span className="status-pulse" /> INDEPENDENT DIGITAL DESIGN & DEVELOPMENT STUDIO</div>
-          <h1 id="hero-title">Websites that<br /><span className="gradient-text">mean business.</span></h1>
-          <p className="hero-description">Distinctive design. Thoughtful development. Digital experiences made to help your business <strong>look better, work smarter and grow.</strong></p>
+          <div className="hero-topline"><span className="status-pulse" /> {hero.eyebrow}</div>
+          <h1 id="hero-title">{hero.heading}<br /><span className="gradient-text">{hero.emphasis}</span></h1>
+          <p className="hero-description">{hero.description}</p>
           <div className="hero-actions">
             <ButtonLink href="#contact">Start your project</ButtonLink>
             <a className="text-link" href="#work">Explore our work <ArrowDown size={17} /></a>
           </div>
           <div className="hero-points">
-            <span><Check size={15} /> Tailored to your brand</span>
-            <span><Check size={15} /> Mobile-first & SEO-ready</span>
-            <span><Check size={15} /> Support beyond launch</span>
+            {(hero.highlights || []).map(text => <span key={text}><Check size={15} /> {text}</span>)}
           </div>
         </div>
         <BrowserMockup />
@@ -246,14 +209,10 @@ function Hero() {
 
 // The former infinite ticker clipped its words on narrow screens and used an
 // inconsistent Unicode star. This responsive journey keeps every step readable.
-const journeyStages = [
-  { title: 'DESIGN', detail: 'Ideas shaped into an identity.', icon: Palette, accent: 'cyan' },
-  { title: 'DEVELOP', detail: 'Thoughtful code, built to perform.', icon: Code2, accent: 'blue' },
-  { title: 'DEPLOY', detail: 'Your next big launch, made simple.', icon: Rocket, accent: 'violet' },
-  { title: 'GROW', detail: 'Ready for whatever comes next.', icon: TrendingUp, accent: 'mint' },
-];
-
 function JourneyStrip() {
+  const { content } = useSite();
+  const icons = {palette:Palette,code:Code2,rocket:Rocket,trending:TrendingUp};
+  const journeyStages = content.journey.map(item => ({...item,icon:icons[item.icon]||Palette}));
   // Duplicate boundary slides allow the mobile carousel to loop smoothly
   // without snapping backwards through all four steps.
   const total = journeyStages.length;
@@ -412,18 +371,21 @@ function JourneyStrip() {
 }
 
 function Services() {
+  const { content } = useSite();
+  const whatsappLink = useWhatsApp();
+  const icons = { monitor: Monitor, shopping: ShoppingBag, code: Code2 };
   return (
     <section className="services-section section-light" id="services" aria-labelledby="services-title">
       <div className="container">
         <div className="section-intro-row">
-          <div id="services-title"><SectionHeading eyebrow="WHAT WE DO" title="The right solution." emphasis="Built your way." text="No one-size-fits-all websites. We bring strategy, design and development together for your next big move." /></div>
+          <div id="services-title"><SectionHeading eyebrow={content.copy.services_eyebrow} title={content.copy.services_title} emphasis={content.copy.services_emphasis} text={content.copy.services_description} /></div>
           <a className="section-link reveal" href="#contact">Let's plan your project <ArrowUpRight size={19} /></a>
         </div>
         <div className="services-grid">
-          {services.map((service, i) => {
-            const Icon = service.icon;
+          {content.services.map((service, i) => {
+            const Icon = icons[service.icon] || Monitor;
             return <article key={service.name} className={`service-card service-${service.tone} reveal delay-${i + 1}`}>
-              <div className="service-top"><span className="service-icon"><Icon size={28} strokeWidth={1.5} /></span><span className="service-number">/ {service.number}</span></div>
+              <div className="service-top"><span className="service-icon"><Icon size={28} strokeWidth={1.5} /></span><span className="service-number">/ {String(i + 1).padStart(2, "0")}</span></div>
               <div className="service-image"><img src={service.image} alt={`${service.name} design inspiration`} loading="lazy" decoding="async" width="640" height="360" /></div>
               <div className="service-copy"><span className="card-eyebrow">{service.category}</span><h3>{service.name}</h3><p>{service.description}</p></div>
               <div className="service-tags">{service.tags.map(tag => <span key={tag}>{tag}</span>)}</div>
@@ -437,12 +399,14 @@ function Services() {
 }
 
 function BenefitBar() {
+  const { content } = useSite();
+  const icons = {shield: ShieldCheck, search: Search, cloud: Zap, headphones: Cloud};
   return (
     <section className="benefits-section section-light" aria-label="Why build with D-SIGN DESIGNERS">
       <div className="container">
         <div className="benefits-grid">
-          {promises.map((promise, i) => {
-            const Icon = promise.icon;
+          {content.benefits.map((promise, i) => {
+            const Icon = icons[promise.icon] || ShieldCheck;
             return <div className={`benefit reveal delay-${i % 4 + 1}`} key={promise.title}><Icon size={24} strokeWidth={1.6} /><div><h3>{promise.title}</h3><p>{promise.detail}</p></div></div>;
           })}
         </div>
@@ -451,15 +415,12 @@ function BenefitBar() {
   );
 }
 
-const ideaChoices = [
-  { id: 'marketing', label: 'Business website', icon: Monitor, projectType: 'Marketing / Business website', headline: 'Make an unforgettable first impression.', copy: 'For brands that need a thoughtful online home, clear messaging and a compelling way to get in touch.', image: '/images/concepts/horizon-villa.webp', includes: ['Brand-led page design', 'SEO-friendly structure', 'Responsive experiences'] },
-  { id: 'commerce', label: 'Online store', icon: ShoppingBag, projectType: 'E-commerce website', headline: 'Turn browsing into a better buying journey.', copy: 'For businesses ready to showcase products, simplify discovery and build a store around their customers.', image: '/images/concepts/nordic-objects.webp', includes: ['Product discovery', 'Storefront experiences', 'Checkout planning'] },
-  { id: 'application', label: 'Web application', icon: LayoutGrid, projectType: 'Custom web application', headline: 'Make your everyday work feel effortless.', copy: 'For teams with specific processes that call for a purposeful, secure-minded application.', image: '/images/concepts/digital-flux.webp', includes: ['Workflow discovery', 'Role-based interfaces', 'Integration planning'] }
-];
-
 function IdeaStudio({ onStartProject }) {
+  const { content } = useSite();
+  const icons = {monitor:Monitor,shopping:ShoppingBag,layout:LayoutGrid};
+  const choices = content.planner.map(item => ({...item,icon:icons[item.icon] || Monitor}));
   const [selection, setSelection] = useState('marketing');
-  const selected = ideaChoices.find(item => item.id === selection);
+  const selected = choices.find(item => item.id === selection) || choices[0];
   return <section className="idea-section section-light" id="idea-studio" aria-labelledby="idea-title">
     <div className="container idea-layout">
       <div className="idea-intro reveal">
@@ -467,7 +428,7 @@ function IdeaStudio({ onStartProject }) {
         <h2 id="idea-title">Not sure where to <span>start?</span></h2>
         <p>Choose what you'd like to create. We'll show you a starting direction and carry your choice into the enquiry form.</p>
         <div className="idea-selector" role="group" aria-label="Choose a project direction">
-          {ideaChoices.map(item => { const Icon = item.icon; return <button type="button" key={item.id} aria-pressed={selection === item.id} className={selection === item.id ? 'idea-selected' : ''} onClick={() => setSelection(item.id)}><Icon size={18}/>{item.label}<ArrowRight size={16}/></button>; })}
+          {choices.map(item => { const Icon = item.icon; return <button type="button" key={item.id} aria-pressed={selection === item.id} className={selection === item.id ? 'idea-selected' : ''} onClick={() => setSelection(item.id)}><Icon size={18}/>{item.label}<ArrowRight size={16}/></button>; })}
         </div>
       </div>
       <div className="idea-result reveal" aria-live="polite" aria-atomic="true">
@@ -486,18 +447,21 @@ function ConceptPreview({ project }) {
 }
 
 function Portfolio() {
+  const { content, projects: liveProjects } = useSite();
+  const whatsappLink = useWhatsApp();
+  const portfolioProjects = (liveProjects === null ? projects : liveProjects).map((project, index) => ({ ...project, number: String(index+1).padStart(2, "0"), kind: project.kind || "concept", image: project.image || project.image_url || "/images/concepts/studio-spaces.webp" }));
   const [filter, setFilter] = useState('All');
   const [selected, setSelected] = useState(null);
   const triggerRef = useRef(null);
   const dialogRef = useRef(null);
   const closeRef = useRef(null);
   const filters = ['All', 'Marketing', 'E-commerce', 'Web Apps'];
-  const shown = filter === 'All' ? projects : projects.filter(project => project.type === filter);
+  const shown = filter === 'All' ? portfolioProjects : portfolioProjects.filter(project => project.type === filter);
   const openProject = (project, event) => { triggerRef.current = event.currentTarget; setSelected(project); };
   const closeProject = () => { setSelected(null); requestAnimationFrame(() => triggerRef.current?.focus()); };
   const goProject = (direction) => setSelected(current => {
     const index = shown.findIndex(project => project.number === current.number);
-    return shown[(index + direction + shown.length) % shown.length];
+    return shown.length ? shown[(index + direction + shown.length) % shown.length] : current;
   });
   useEffect(() => {
     if (!selected) return undefined;
@@ -520,14 +484,15 @@ function Portfolio() {
   }, [Boolean(selected)]);
   return <section className="portfolio-section section-dark" id="work" aria-labelledby="work-title">
     <div className="container">
-      <div className="work-heading-row"><div id="work-title"><SectionHeading light eyebrow="EXPLORE THE GALLERY" title="Ideas worth" emphasis="bringing to life." text="Browse our original design studies across websites, stores and applications. These are visual concepts, not commissioned client work." /></div><div className="concept-disclaimer reveal"><Sparkles size={17}/><span>Original concepts · Not client case studies</span></div></div>
+      <div className="work-heading-row"><div id="work-title"><SectionHeading light eyebrow={content.copy.gallery_eyebrow} title={content.copy.gallery_title} emphasis={content.copy.gallery_emphasis} text={content.copy.gallery_description} /></div><div className="concept-disclaimer reveal"><Sparkles size={17}/><span>Concepts are labelled · Client work is identified</span></div></div>
       <div className="portfolio-toolbar"><div className="portfolio-filters" role="group" aria-label="Filter gallery by project type">
         {filters.map(f => <button key={f} type="button" className={filter === f ? 'selected' : ''} onClick={() => setFilter(f)} aria-pressed={filter === f}>{f}</button>)}
-      </div><span className="portfolio-count" role="status">SHOWING {shown.length.toString().padStart(2,'0')} / {projects.length.toString().padStart(2,'0')} CONCEPTS</span></div>
+      </div><span className="portfolio-count" role="status">SHOWING {shown.length.toString().padStart(2,'0')} / {portfolioProjects.length.toString().padStart(2,'0')} PROJECTS</span></div>
       <div className="portfolio-grid">
+        {!shown.length && <p className="empty-gallery">No published projects in this category yet. Check back soon.</p>}
         {shown.map(project => <article className="project-card" key={project.number}>
-          <button type="button" className="project-open" onClick={event => openProject(project,event)} aria-label={`Preview ${project.title} concept`}><ConceptPreview project={project} /><span className="project-zoom"><ArrowUpRight size={21}/></span></button>
-          <div className="project-details"><div><span>{project.category} / {project.number}</span><h3>{project.title}</h3><p>{project.subtitle}</p></div><button type="button" onClick={event => openProject(project,event)} aria-label={`View details about ${project.title}`}><ArrowUpRight size={23}/></button></div>
+          <button type="button" className="project-open" onClick={event => openProject(project,event)} aria-label={`Preview ${project.title}`}><ConceptPreview project={project} /><span className="project-zoom"><ArrowUpRight size={21}/></span></button>
+          <div className="project-details"><div><span>{project.kind === "client" ? "CLIENT PROJECT" : "DESIGN CONCEPT"} · {project.category} / {project.number}</span><h3>{project.title}</h3><p>{project.subtitle}</p></div><button type="button" onClick={event => openProject(project,event)} aria-label={`View details about ${project.title}`}><ArrowUpRight size={23}/></button></div>
         </article>)}
       </div>
       <div className="work-footnote"><span><span className="footnote-dot"/> Your brand could be next.</span><a href="#contact">Tell us what you have in mind <ArrowRight size={16}/></a></div>
@@ -536,33 +501,40 @@ function Portfolio() {
       <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="gallery-title" aria-describedby="gallery-description" className="gallery-dialog">
         <button ref={closeRef} className="gallery-close" type="button" aria-label="Close project preview" onClick={closeProject}><X size={22}/></button>
         <div className="gallery-image"><img src={selected.image} alt={`${selected.title} design inspiration`} width="1200" height="760" /></div>
-        <div className="gallery-content"><div className="gallery-meta">CONCEPT STUDY / {selected.number} &nbsp;·&nbsp; {selected.type.toUpperCase()}</div><h3 id="gallery-title">{selected.title}</h3><p id="gallery-description">{selected.description}</p><p className="gallery-note">This is an original visual concept and does not represent completed client work.</p><div className="gallery-feature-list">{selected.features.map(feature => <span key={feature}><Check size={14}/>{feature}</span>)}</div><a className="button button-primary gallery-cta" href={whatsappLink(`Hello D-SIGN DESIGNERS! I like the ${selected.title} design concept and would like to discuss something similar.`)} target="_blank" rel="noopener noreferrer">Discuss a similar project <ArrowUpRight size={18}/></a><div className="gallery-navigation"><button type="button" onClick={() => goProject(-1)}><ArrowRight size={17} className="arrow-previous"/> Previous</button><span>{shown.findIndex(item => item.number === selected.number)+1} / {shown.length}</span><button type="button" onClick={() => goProject(1)}>Next <ArrowRight size={17}/></button></div></div>
+        <div className="gallery-content"><div className="gallery-meta">{selected.kind === "client" ? "CLIENT PROJECT" : "CONCEPT STUDY"} / {selected.number} &nbsp;·&nbsp; {selected.type.toUpperCase()}</div><h3 id="gallery-title">{selected.title}</h3><p id="gallery-description">{selected.description}</p>{selected.kind !== "client" && <p className="gallery-note">This is an original visual concept and does not represent completed client work.</p>}<div className="gallery-feature-list">{selected.features.map(feature => <span key={feature}><Check size={14}/>{feature}</span>)}</div><a className="button button-primary gallery-cta" href={whatsappLink(`Hello D-SIGN DESIGNERS! I like the ${selected.title} project and would like to discuss something similar.`)} target="_blank" rel="noopener noreferrer">Discuss a similar project <ArrowUpRight size={18}/></a><div className="gallery-navigation"><button type="button" onClick={() => goProject(-1)}><ArrowRight size={17} className="arrow-previous"/> Previous</button><span>{shown.findIndex(item => item.number === selected.number)+1} / {shown.length}</span><button type="button" onClick={() => goProject(1)}>Next <ArrowRight size={17}/></button></div></div>
       </div>
     </div>}
   </section>;
 }
 
 function Process() {
+  const { content } = useSite();
+  const icons = {compass: Compass, palette: Palette, code: Code2, rocket: Rocket};
   return <section className="process-section section-light" id="process"><div className="container">
-    <div className="process-heading"><SectionHeading eyebrow="OUR APPROACH" title="Simple process." emphasis="Serious attention to detail." text="Clear communication at every stage, from your first idea to the day your website goes live." /></div>
-    <div className="process-grid">{steps.map((step, i) => {const Icon = step.icon; return <div className={`process-step reveal delay-${i+1}`} key={step.index}><div className="process-ordinal">{step.index}<span className="process-connection"/></div><div className="process-icon"><Icon size={26} strokeWidth={1.5}/></div><h3>{step.name}</h3><p>{step.copy}</p></div>})}</div>
+    <div className="process-heading"><SectionHeading eyebrow={content.copy.process_eyebrow} title={content.copy.process_title} emphasis={content.copy.process_emphasis} text={content.copy.process_description} /></div>
+    <div className="process-grid">{content.process.map((step, i) => {const Icon = icons[step.icon] || Compass; return <div className={`process-step reveal delay-${i+1}`} key={`${step.name}-${i}`}><div className="process-ordinal">{String(i+1).padStart(2,"0")}<span className="process-connection"/></div><div className="process-icon"><Icon size={26} strokeWidth={1.5}/></div><h3>{step.name}</h3><p>{step.copy}</p></div>})}</div>
     <div className="process-note reveal"><span><BadgeCheck size={18}/> Clear scope. Thoughtful execution. Transparent handover.</span><a href="#contact">Let's get started <ArrowUpRight size={17}/></a></div>
   </div></section>;
 }
 
 function About() {
+  const { content } = useSite();
   return <section className="about-section section-dark" id="about"><div className="container about-grid">
     <div className="about-visual reveal"><div className="about-graphic"><span className="about-large-d">D<span>.</span></span><div className="about-orbit about-orbit-a"/><div className="about-orbit about-orbit-b"/><span className="about-graphic-annotation">IDEAS → EXPERIENCES → IMPACT</span></div><div className="about-graphic-caption"><span>DESIGN & DEVELOPMENT</span><span>01 / D-SIGN DESIGNERS</span></div></div>
-    <div className="about-copy reveal"><Eyebrow light>WHO WE ARE</Eyebrow><h2>Small studio mindset.<br /><span>Big-picture thinking.</span></h2><p>D-SIGN DESIGNERS is a web design and development business focused on creating thoughtful digital experiences for growing brands, ambitious founders and established companies.</p><p>We bring design sensibility and engineering together — building every project around what you actually need, not just what looks impressive in a screenshot.</p><div className="about-tech"><span>OUR TOOLKIT</span><div>React <i/> JavaScript <i/> Java <i/> Express <i/> FastAPI <i/> Databases</div></div><ButtonLink href="#contact">Work with us</ButtonLink></div>
+    <div className="about-copy reveal"><Eyebrow light>{content.about.eyebrow}</Eyebrow><h2>{content.about.heading}<br /><span>{content.about.emphasis}</span></h2><p>{content.about.paragraph_one}</p><p>{content.about.paragraph_two}</p><div className="about-tech"><span>OUR TOOLKIT</span><div>{content.about.toolkit.split(",").map((tool, i) => <span className="about-tool" key={`${tool}-${i}`}>{i > 0 && <i/>}{tool.trim()}</span>)}</div></div><ButtonLink href="#contact">Work with us</ButtonLink></div>
   </div></section>;
 }
 
 function FAQ() {
+  const { content } = useSite();
+  const whatsappLink = useWhatsApp();
   const [open, setOpen] = useState(0);
-  return <section className="faq-section section-light" id="faq"><div className="container faq-grid"><div className="faq-heading"><SectionHeading eyebrow="GOOD TO KNOW" title="Questions?" emphasis="We've got answers." text="Here's what clients often want to know before getting started."/><div className="faq-cta"><MessageCircle size={22}/><div><strong>Have something else in mind?</strong><span>We're happy to talk through your idea.</span></div><a href={whatsappLink()} target="_blank" rel="noopener noreferrer" aria-label="Ask a question via WhatsApp"><ArrowUpRight size={19}/></a></div></div><div className="faq-list">{faqs.map((faq, i) => <div className={`faq-item ${open === i ? 'faq-open' : ''}`} key={faq.question}><button type="button" onClick={() => setOpen(open === i ? -1 : i)} aria-expanded={open === i} aria-controls={`faq-answer-${i}`} id={`faq-question-${i}`}><span>{faq.question}</span><ChevronDown size={20}/></button><div className="faq-answer" id={`faq-answer-${i}`} role="region" aria-labelledby={`faq-question-${i}`} hidden={open !== i}><p>{faq.answer}</p></div></div>)}</div></div></section>;
+  return <section className="faq-section section-light" id="faq"><div className="container faq-grid"><div className="faq-heading"><SectionHeading eyebrow={content.copy.faq_eyebrow} title={content.copy.faq_title} emphasis={content.copy.faq_emphasis} text={content.copy.faq_description}/><div className="faq-cta"><MessageCircle size={22}/><div><strong>Have something else in mind?</strong><span>We're happy to talk through your idea.</span></div><a href={whatsappLink()} target="_blank" rel="noopener noreferrer" aria-label="Ask a question via WhatsApp"><ArrowUpRight size={19}/></a></div></div><div className="faq-list">{content.faqs.map((faq, i) => <div className={`faq-item ${open === i ? 'faq-open' : ''}`} key={faq.question}><button type="button" onClick={() => setOpen(open === i ? -1 : i)} aria-expanded={open === i} aria-controls={`faq-answer-${i}`} id={`faq-question-${i}`}><span>{faq.question}</span><ChevronDown size={20}/></button><div className="faq-answer" id={`faq-answer-${i}`} role="region" aria-labelledby={`faq-question-${i}`} hidden={open !== i}><p>{faq.answer}</p></div></div>)}</div></div></section>;
 }
 
 function Contact({ selectedProjectType }) {
+  const { content } = useSite();
+  const whatsappLink = useWhatsApp();
   const [form, setForm] = useState(initialQuote);
   const [status, setStatus] = useState('');
   const [preparedLink, setPreparedLink] = useState('');
@@ -588,9 +560,9 @@ function Contact({ selectedProjectType }) {
   };
 
   return <section className="contact-section section-dark" id="contact"><div className="container">
-    <div className="contact-top reveal"><Eyebrow light>LET'S MAKE SOMETHING GREAT</Eyebrow><h2>Have a project in mind?<br/><span>Let's make it happen.</span></h2><p>Tell us a little about your idea. We'll help you figure out the right next step.</p></div>
+    <div className="contact-top reveal"><Eyebrow light>{content.copy.contact_eyebrow}</Eyebrow><h2>{content.copy.contact_title}<br/><span>{content.copy.contact_emphasis}</span></h2><p>{content.copy.contact_description}</p></div>
     <div className="contact-grid">
-      <div className="contact-aside reveal"><div className="contact-aside-block"><span>START A CONVERSATION</span><a className="contact-whatsapp" href={whatsappLink()} target="_blank" rel="noopener noreferrer"><MessageCircle size={27}/><span>Chat on WhatsApp</span><ArrowUpRight size={20}/></a><a className="contact-phone" href="tel:+94701188941"><Phone size={18}/> {BUSINESS_PHONE}</a></div><div className="contact-aside-divider"/><div className="contact-aside-block"><span>WHAT TO EXPECT</span><ul><li><Check size={17}/> A conversation about your goals</li><li><Check size={17}/> Recommendations tailored to your needs</li><li><Check size={17}/> A clear project scope and quotation</li></ul></div><div className="aside-sparkle"><Sparkles size={36} strokeWidth={1}/><span>YOUR IDEA IS<br/>OUR STARTING POINT.</span></div></div>
+      <div className="contact-aside reveal"><div className="contact-aside-block"><span>START A CONVERSATION</span><a className="contact-whatsapp" href={whatsappLink()} target="_blank" rel="noopener noreferrer"><MessageCircle size={27}/><span>Chat on WhatsApp</span><ArrowUpRight size={20}/></a><a className="contact-phone" href={`tel:+${content.site.whatsapp}`}><Phone size={18}/> {content.site.phone}</a></div><div className="contact-aside-divider"/><div className="contact-aside-block"><span>WHAT TO EXPECT</span><ul><li><Check size={17}/> A conversation about your goals</li><li><Check size={17}/> Recommendations tailored to your needs</li><li><Check size={17}/> A clear project scope and quotation</li></ul></div><div className="aside-sparkle"><Sparkles size={36} strokeWidth={1}/><span>YOUR IDEA IS<br/>OUR STARTING POINT.</span></div></div>
       <form className="quote-form reveal" onSubmit={submit} aria-label="Project quotation enquiry"><div className="form-header"><div><span>PROJECT ENQUIRY</span><h3>Tell us what you're imagining.</h3></div><div className="form-step">01 <span>/ 01</span></div></div>
         <div className="form-row"><label>Your name <span>*</span><input name="name" value={form.name} onChange={onChange} placeholder="Your name" required maxLength={90} autoComplete="name" /></label><label>Business / brand<input name="business" value={form.business} onChange={onChange} placeholder="Company or brand name" maxLength={120} autoComplete="organization"/></label></div>
         <div className="form-row"><label>Contact number<input name="phone" value={form.phone} onChange={onChange} type="tel" placeholder="Your preferred number" maxLength={35} autoComplete="tel"/></label><label>Project type<select name="projectType" value={form.projectType} onChange={onChange}><option>Marketing / Business website</option><option>E-commerce website</option><option>Custom web application</option><option>Website redesign</option><option>Maintenance / support</option><option>Not sure yet</option></select></label></div>
@@ -614,7 +586,9 @@ function BackToTop() {
 }
 
 function Footer() {
-  return <footer className="footer section-dark"><div className="container"><div className="footer-top"><div className="footer-brand"><Logo compact/><p>We design for you,<br/>for your requirements.</p></div><div className="footer-nav"><div><span>EXPLORE</span><a href="#services">Services</a><a href="#work">Our work</a><a href="#process">Our process</a><a href="#about">About us</a></div><div><span>GET IN TOUCH</span><a href="tel:+94701188941">{BUSINESS_PHONE}</a><a href={whatsappLink()} target="_blank" rel="noopener noreferrer">WhatsApp <ArrowUpRight size={13}/></a><a href="#contact">Request a quote</a></div></div></div><div className="footer-bottom"><span>© {new Date().getFullYear()} D-SIGN DESIGNERS. All rights reserved.</span><span>DESIGN · DEVELOPMENT · DIGITAL EXPERIENCES</span><a href="#home">Back to top <ArrowUpRight size={13}/></a></div></div></footer>;
+  const { content } = useSite();
+  const whatsappLink = useWhatsApp();
+  return <footer className="footer section-dark"><div className="container"><div className="footer-top"><div className="footer-brand"><Logo compact/><p>{content.copy.footer_tagline}</p></div><div className="footer-nav"><div><span>EXPLORE</span><a href="#services">Services</a><a href="#work">Our work</a><a href="#process">Our process</a><a href="#about">About us</a></div><div><span>GET IN TOUCH</span><a href={`tel:+${content.site.whatsapp}`}>{content.site.phone}</a><a href={whatsappLink()} target="_blank" rel="noopener noreferrer">WhatsApp <ArrowUpRight size={13}/></a><a href="#contact">Request a quote</a></div></div></div><div className="footer-bottom"><span>© {new Date().getFullYear()} D-SIGN DESIGNERS. All rights reserved.</span><span>DESIGN · DEVELOPMENT · DIGITAL EXPERIENCES</span><a href="#home">Back to top <ArrowUpRight size={13}/></a></div></div></footer>;
 }
 
 
@@ -624,6 +598,7 @@ function Footer() {
  * Muting is a preference, not a pause: the track continues silently and loops.
  */
 function AmbientPlayer() {
+  const { content } = useSite();
   const audioRef = useRef(null);
   const [muted, setMuted] = useState(() => {
     try {
@@ -640,7 +615,7 @@ function AmbientPlayer() {
     const audio = audioRef.current;
     if (!audio) return undefined;
     let active = true;
-    audio.volume = 0.36;
+    audio.volume = Math.min(0.75, Math.max(0, Number(content.site.music_volume) || 0.54));
     audio.muted = muted;
 
     const onPlaying = () => {
@@ -715,6 +690,10 @@ function AmbientPlayer() {
       audio.removeEventListener('error', onError);
     };
   }, []); // Initial preference is read before first render.
+
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.volume = Math.min(0.75, Math.max(0, Number(content.site.music_volume) || 0.54));
+  }, [content.site.music_volume]);
 
   const toggleSound = () => {
     const audio = audioRef.current;
@@ -817,9 +796,26 @@ function ReadingProgress() {
   return <div className="reading-progress" aria-hidden="true"><span style={{width: `${progress}%`}} /></div>;
 }
 
-export default function App() {
+export default function App({ theme, setTheme }) {
   const [activeSection, setActiveSection] = useState('home');
   const [selectedProjectType, setSelectedProjectType] = useState('');
+  const [website, setWebsite] = useState({ content: mergeContent(), projects: null, source: 'static' });
+  useEffect(() => {
+    let mounted = true;
+    loadWebsiteData().then(data => { if (mounted) setWebsite(data); });
+    return () => { mounted = false; };
+  }, []);
+  useEffect(() => {
+    if (localStorage.getItem('dsign-theme')) return;
+    const preset = website.content.site.default_theme;
+    if (preset === 'dark' || preset === 'light') setTheme(preset, false);
+  }, [website.content.site.default_theme]);
+  useEffect(() => {
+    const title = website.content.site.meta_title;
+    const description = website.content.site.meta_description;
+    if (title) document.title = title;
+    if (description) document.querySelector('meta[name="description"]')?.setAttribute('content', description);
+  }, [website.content]);
   useEffect(() => {
     const selectActive = () => {
       const ids = ['home', 'services', 'work', 'process', 'about', 'faq', 'contact'];
@@ -835,9 +831,18 @@ export default function App() {
     if (!('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       items.forEach(item => item.classList.add('is-visible')); return;
     }
-    const observer = new IntersectionObserver(entries => entries.forEach(entry => { if (entry.isIntersecting) {entry.target.classList.add('is-visible'); observer.unobserve(entry.target);} }), { threshold: 0.09, rootMargin: '0px 0px -40px 0px' });
+    const observer = new IntersectionObserver(entries => entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('is-visible'); observer.unobserve(entry.target); } }), { threshold: 0.09, rootMargin: '0px 0px -40px 0px' });
     items.forEach(item => observer.observe(item));
     return () => observer.disconnect();
-  }, []);
-  return <><a href="#main-content" className="skip-link">Skip to content</a><ReadingProgress/><Header activeSection={activeSection}/><main id="main-content"><Hero/><JourneyStrip/><Services/><BenefitBar/><IdeaStudio onStartProject={setSelectedProjectType}/><Portfolio/><Process/><About/><FAQ/><Contact selectedProjectType={selectedProjectType}/></main><Footer/><AmbientPlayer/><BackToTop/></>;
+  }, [website.source]);
+  return <SiteContext.Provider value={{ ...website, theme }}>
+    <a href="#main-content" className="skip-link">Skip to content</a>
+    <ReadingProgress />
+    <Header activeSection={activeSection} theme={theme} setTheme={setTheme}/>
+    <main id="main-content"><Hero/><JourneyStrip/><Services/><BenefitBar/><IdeaStudio onStartProject={setSelectedProjectType}/><Portfolio/><Process/><About/><FAQ/><Contact selectedProjectType={selectedProjectType}/></main>
+    <Footer/>
+    {website.content.site.music_enabled !== false && <AmbientPlayer/>}
+    <BackToTop/>
+    <SplashScreen enabled={website.content.site.splash_enabled !== false} logo={website.content.site.logo_url}/>
+  </SiteContext.Provider>;
 }

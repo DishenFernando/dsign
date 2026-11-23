@@ -20,7 +20,7 @@ for (const url of new Set(publicImages)) {
 const concepts = readdirSync(resolve(root, 'public/images/concepts')).filter(file => file.endsWith('.webp'));
 expect(concepts.length === 9, `Expected 9 locally bundled concept images, found ${concepts.length}`);
 expect((app.match(/category: '[^']+ concept'/g) || []).length >= 3, 'Expected concept portfolio labels');
-expect(app.includes('Concept projects') || app.includes('not commissioned client work'), 'Explicit portfolio concept disclaimer missing');
+expect(app.includes('original visual concept') && app.includes('selected.kind !== "client"'), 'Explicit portfolio concept disclaimer missing');
 expect(app.includes('prefers-reduced-motion'), 'Reduced-motion support missing');
 expect(app.includes('aria-modal="true"'), 'Accessible gallery dialog missing');
 expect(app.includes('wa.me/'), 'WhatsApp enquiry link missing');

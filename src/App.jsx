@@ -774,7 +774,7 @@ function AmbientPlayer() {
         aria-label={hint}
         title={hint}
       >
-        {muted ? <VolumeX size={60} aria-hidden="true" /> : <Volume2 size={60} aria-hidden="true" />}
+        {muted ? <VolumeX size={19} aria-hidden="true" /> : <Volume2 size={19} aria-hidden="true" />}
         <span className="ambient-bars" aria-hidden="true"><i /><i /><i /></span>
       </button>
       <span className="ambient-tooltip" aria-hidden="true">

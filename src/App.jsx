@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import {
-  ArrowDown, ArrowRight, ArrowUpRight, BadgeCheck, Check, ChevronDown,
+  ArrowDown, ArrowRight, ArrowUpRight, BadgeCheck, Check, ChevronDown, ChevronLeft, ChevronRight,
   Cloud, Code2, Compass, Database, Globe2, Headphones,
   LayoutGrid, LockKeyhole, Menu, MessageCircle, Monitor,
   Palette, Phone, Rocket, Search, ShieldCheck, ShoppingBag,
@@ -244,9 +244,171 @@ function Hero() {
   );
 }
 
-function Ticker() {
-  const words = ['DESIGN', 'DEVELOP', 'DEPLOY', 'GROW', 'DESIGN', 'DEVELOP', 'DEPLOY', 'GROW'];
-  return <div className="ticker" aria-hidden="true"><div className="ticker-track">{words.map((word, i) => <span key={`${word}-${i}`}>{word}<span className="ticker-star">✳</span></span>)}</div></div>;
+// The former infinite ticker clipped its words on narrow screens and used an
+// inconsistent Unicode star. This responsive journey keeps every step readable.
+const journeyStages = [
+  { title: 'DESIGN', detail: 'Ideas shaped into an identity.', icon: Palette, accent: 'cyan' },
+  { title: 'DEVELOP', detail: 'Thoughtful code, built to perform.', icon: Code2, accent: 'blue' },
+  { title: 'DEPLOY', detail: 'Your next big launch, made simple.', icon: Rocket, accent: 'violet' },
+  { title: 'GROW', detail: 'Ready for whatever comes next.', icon: TrendingUp, accent: 'mint' },
+];
+
+function JourneyStrip() {
+  // Duplicate boundary slides allow the mobile carousel to loop smoothly
+  // without snapping backwards through all four steps.
+  const total = journeyStages.length;
+  const slides = [journeyStages[total - 1], ...journeyStages, journeyStages[0]];
+  const [trackIndex, setTrackIndex] = useState(1);
+  const [transitionEnabled, setTransitionEnabled] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [reduceMotion, setReduceMotion] = useState(false);
+  const [userControlled, setUserControlled] = useState(false);
+  const sectionRef = useRef(null);
+  const trackRef = useRef(null);
+  const swipeStartRef = useRef(null);
+  const animationFrameRef = useRef([]);
+  const activeIndex = (trackIndex - 1 + total) % total;
+
+  useEffect(() => {
+    const mobileQuery = window.matchMedia('(max-width: 900px)');
+    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const updateMobile = () => setIsMobile(mobileQuery.matches);
+    const updateMotion = () => setReduceMotion(motionQuery.matches);
+    updateMobile();
+    updateMotion();
+    mobileQuery.addEventListener('change', updateMobile);
+    motionQuery.addEventListener('change', updateMotion);
+    return () => {
+      mobileQuery.removeEventListener('change', updateMobile);
+      motionQuery.removeEventListener('change', updateMotion);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!sectionRef.current) return;
+    if (!('IntersectionObserver' in window)) {
+      setIsVisible(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { threshold: 0.2 }
+    );
+    observer.observe(sectionRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!isMobile || !isVisible || reduceMotion || userControlled) return;
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        setTrackIndex(index => index === total + 1 ? 2 : index + 1);
+      }
+    }, 4500);
+    return () => window.clearInterval(timer);
+  }, [isMobile, isVisible, reduceMotion, userControlled, total]);
+
+  useEffect(() => () => {
+    animationFrameRef.current.forEach(window.cancelAnimationFrame);
+  }, []);
+
+  function move(direction) {
+    setUserControlled(true); // Don't change slides while a visitor is reading.
+    setTrackIndex(index => {
+      const current = (index - 1 + total) % total;
+      if (reduceMotion) return ((current + direction + total) % total) + 1;
+      // At a boundary clone, start from its real counterpart.
+      if (index === 0 || index === total + 1) return ((current + direction + total) % total) + 1;
+      return index + direction;
+    });
+  }
+
+  function selectSlide(index) {
+    setUserControlled(true);
+    setTrackIndex(index + 1);
+  }
+
+  function handleTransitionEnd(event) {
+    if (event.target !== trackRef.current || event.propertyName !== 'transform') return;
+    if (trackIndex !== 0 && trackIndex !== total + 1) return;
+    setTransitionEnabled(false);
+    setTrackIndex(trackIndex === 0 ? total : 1);
+    // Re-enable transitions after the browser has painted the instant reset.
+    const first = window.requestAnimationFrame(() => {
+      const second = window.requestAnimationFrame(() => setTransitionEnabled(true));
+      animationFrameRef.current.push(second);
+    });
+    animationFrameRef.current.push(first);
+  }
+
+  function handleTouchEnd(event) {
+    if (swipeStartRef.current === null) return;
+    const distance = event.changedTouches[0].clientX - swipeStartRef.current;
+    swipeStartRef.current = null;
+    if (Math.abs(distance) > 42) move(distance < 0 ? 1 : -1);
+  }
+
+  return (
+    <section className="journey-strip" ref={sectionRef} aria-label="How D-SIGN DESIGNERS brings ideas to life">
+      <div className="container journey-inner">
+        <div className="journey-intro">
+          <span className="journey-kicker"><span className="journey-kicker-dot" /> THE D-SIGN JOURNEY</span>
+          <span className="journey-intro-right">FROM FIRST IDEA TO WHAT'S NEXT</span>
+        </div>
+        <div className="journey-desktop" aria-label="Our four stages">
+          {journeyStages.map((stage, index) => {
+            const Icon = stage.icon;
+            return <div className="journey-stage" key={stage.title}>
+              <div className={`journey-stage-icon journey-${stage.accent}`}><Icon size={20} strokeWidth={2} aria-hidden="true" /></div>
+              <div className="journey-stage-copy"><span className="journey-stage-number">0{index + 1}</span><strong>{stage.title}</strong><span className="journey-stage-detail">{stage.detail}</span></div>
+              {index < total - 1 && <ArrowRight className="journey-stage-arrow" size={17} aria-hidden="true" />}
+            </div>;
+          })}
+        </div>
+        <div className="journey-mobile">
+          <div className="journey-viewport"
+            aria-roledescription="carousel"
+            aria-label="Our four-stage process"
+            onTouchStart={event => { swipeStartRef.current = event.touches[0].clientX; }}
+            onTouchEnd={handleTouchEnd}
+            onTouchCancel={() => { swipeStartRef.current = null; }}>
+            <div className="journey-slider-track" ref={trackRef}
+              onTransitionEnd={handleTransitionEnd}
+              style={{ transform: `translate3d(-${trackIndex * 100}%, 0, 0)`, transition: transitionEnabled && !reduceMotion ? undefined : 'none' }}>
+              {slides.map((stage, index) => {
+                const Icon = stage.icon;
+                const step = (index - 1 + total) % total;
+                return <div className="journey-slide" key={`${stage.title}-${index}`}
+                  role="group" aria-roledescription="slide" aria-label={`${stage.title}, step ${step + 1} of ${total}`}
+                  aria-hidden={index !== trackIndex}>
+                  <div className={`journey-slide-icon journey-${stage.accent}`}><Icon size={24} strokeWidth={1.9} aria-hidden="true" /></div>
+                  <div className="journey-slide-text"><span className="journey-slide-eyebrow">STEP 0{step + 1} / 0{total}</span><strong>{stage.title}</strong><span>{stage.detail}</span></div>
+                  <span className="journey-slide-flourish" aria-hidden="true">0{step + 1}</span>
+                </div>;
+              })}
+            </div>
+          </div>
+          <div className="journey-controls">
+            <div className="journey-dots" role="group" aria-label="Choose a stage">
+              {journeyStages.map((stage, index) => (
+                <button key={stage.title} type="button"
+                  className={`journey-dot ${activeIndex === index ? 'is-active' : ''}`}
+                  aria-label={`Show ${stage.title.toLowerCase()} stage`}
+                  aria-current={activeIndex === index ? 'step' : undefined}
+                  onClick={() => selectSlide(index)} />
+              ))}
+            </div>
+            <div className="journey-arrows">
+              <button type="button" className="journey-arrow" onClick={() => move(-1)} aria-label="Previous stage"><ChevronLeft size={18} aria-hidden="true" /></button>
+              <button type="button" className="journey-arrow" onClick={() => move(1)} aria-label="Next stage"><ChevronRight size={18} aria-hidden="true" /></button>
+            </div>
+          </div>
+          <span className="sr-only" aria-live={userControlled ? 'polite' : 'off'}>{userControlled ? `Showing ${journeyStages[activeIndex].title.toLowerCase()}, step ${activeIndex + 1} of ${total}` : ''}</span>
+        </div>
+      </div>
+    </section>
+  );
 }
 
 function Services() {
@@ -677,5 +839,5 @@ export default function App() {
     items.forEach(item => observer.observe(item));
     return () => observer.disconnect();
   }, []);
-  return <><a href="#main-content" className="skip-link">Skip to content</a><ReadingProgress/><Header activeSection={activeSection}/><main id="main-content"><Hero/><Ticker/><Services/><BenefitBar/><IdeaStudio onStartProject={setSelectedProjectType}/><Portfolio/><Process/><About/><FAQ/><Contact selectedProjectType={selectedProjectType}/></main><Footer/><AmbientPlayer/><BackToTop/></>;
+  return <><a href="#main-content" className="skip-link">Skip to content</a><ReadingProgress/><Header activeSection={activeSection}/><main id="main-content"><Hero/><JourneyStrip/><Services/><BenefitBar/><IdeaStudio onStartProject={setSelectedProjectType}/><Portfolio/><Process/><About/><FAQ/><Contact selectedProjectType={selectedProjectType}/></main><Footer/><AmbientPlayer/><BackToTop/></>;
 }

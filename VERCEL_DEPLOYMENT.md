@@ -43,6 +43,10 @@ Choose the existing project or create a new project when prompted. Use Vite and 
 
 In Vercel Project → Settings → Domains, add your owned domain. Follow the DNS instructions shown by Vercel, then test HTTPS, canonical URL, redirects and social previews.
 
+## Enable Vercel Web Analytics (v3.2)
+
+The React Analytics component and npm dependency are already included. Open **Vercel Project → Analytics**, click **Enable** if necessary, and deploy the updated site. Check production visits and the browser Network tab for a Vercel analytics `view` request. Full details: **VERCEL_ANALYTICS_SETUP.md**.
+
 ## Post-deployment check
 
 1. Open the live site on a phone and a desktop.

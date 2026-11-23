@@ -1,4 +1,8 @@
-# Latest upgrade: v3 (23 November 2026)
+# Latest upgrade: v3.2 — Vercel Web Analytics (23 November 2026)
+
+Added Vercel Web Analytics for visitor and page-view insights. See **VERCEL_ANALYTICS_SETUP.md** for installation, enabling analytics in the Vercel dashboard, and verification. The previous logo, gallery, and ambient music behavior remain unchanged.
+
+## Previous upgrade: v3 (23 November 2026)
 
 For the transparent logo, ambient music control, and interactive design updates, read **V3_UPGRADE_GUIDE.md**. The page remains a static React/Vite project, with original self-hosted audio and no new npm dependencies.
 
@@ -14,6 +18,7 @@ A custom-built, premium responsive marketing website for **D-SIGN DESIGNERS**.
 ## What's included
 
 - React 19 + Vite 6 with clean, editable source code
+- Vercel Web Analytics for privacy-conscious visitor and page-view statistics on the deployed site
 - Your supplied D-SIGN DESIGNERS logo, original matching favicon, branded social preview and nine optimized WebP concept images
 - Premium navy/blue responsive visual system
 - Sticky navigation, mobile menu, anchor navigation, active-section highlighting
@@ -79,6 +84,7 @@ No server, database, environment variables or API keys are necessary for this in
 | Active favicon | `public/favicon.png` |
 | Search and social previews | `index.html` and `public/og-cover.png` |
 | Vercel deployment config | `vercel.json` |
+| Web Analytics | `src/main.jsx`, `package.json`, `VERCEL_ANALYTICS_SETUP.md` |
 
 ## How the quote form works
 
@@ -87,6 +93,9 @@ The form collects project details **in the visitor's browser**, builds a properl
 The client can provide their name, business, optional phone, project type, tentative budget, timeframe and a project description. The WhatsApp message includes all fields. This avoids hosting a backend for the first launch; if you later want a CRM, use a real API with rate limits, spam controls, privacy disclosures and server-side validation.
 
 ## Before going live
+
+- Enable Vercel Web Analytics in the project dashboard, deploy again, and verify production traffic using `VERCEL_ANALYTICS_SETUP.md`.
+- Review and update your published privacy notice for analytics collection and applicable privacy requirements.
 
 - Replace the nine **concept** portfolio designs with real screenshots and case studies when permitted by customers.
 - Confirm brand/trademark availability and domain ownership.

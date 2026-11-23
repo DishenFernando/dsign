@@ -10,7 +10,7 @@ const failures = [];
 function expect(condition, message) { if (!condition) failures.push(message); }
 
 const publicImages = [
-  ...app.matchAll(/["'](\/images\/[^"']+|\/dsign-logo-original\.png)["']/g),
+  ...app.matchAll(/["'](\/images\/[^"']+|\/dsign-logo-dark\.png|\/audio\/[^"']+)["']/g),
   ...html.matchAll(/(?:href|content)=["'](\/(?:favicon\.png|og-cover\.png))["']/g),
   ...css.matchAll(/url\(["']?(\/images\/[^)'" ]+)/g),
 ].map(match => match[1]);
@@ -24,6 +24,9 @@ expect(app.includes('Concept projects') || app.includes('not commissioned client
 expect(app.includes('prefers-reduced-motion'), 'Reduced-motion support missing');
 expect(app.includes('aria-modal="true"'), 'Accessible gallery dialog missing');
 expect(app.includes('wa.me/'), 'WhatsApp enquiry link missing');
+expect(app.includes('audio.play()'), 'Autoplay attempt missing');
+expect(app.includes('aria-pressed={playing}'), 'Music toggle not accessible');
+expect(!css.includes('background: #f7fbff;\n  border: 1px solid rgba(255,255,255,.58);'), 'Old boxed brand treatment remains');
 if (failures.length) {
   console.error(failures.map(message => `FAIL: ${message}`).join('\n'));
   process.exitCode = 1;

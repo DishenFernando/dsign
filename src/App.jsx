@@ -4,7 +4,7 @@ import {
   Cloud, Code2, Compass, Database, Globe2, Headphones,
   LayoutGrid, LockKeyhole, Menu, MessageCircle, Monitor,
   Palette, Phone, Rocket, Search, ShieldCheck, ShoppingBag,
-  Sparkles, TrendingUp, X, Zap
+  Sparkles, TrendingUp, X, Zap, Volume2, VolumeX
 } from 'lucide-react';
 
 const BUSINESS_PHONE = '070 118 8941';
@@ -15,7 +15,7 @@ const whatsappLink = (text = 'Hello D-SIGN DESIGNERS! I would like to discuss a 
 const menuItems = [
   { label: 'Home', href: '#home' },
   { label: 'Services', href: '#services' },
-  { label: 'Gallery', href: '#work' },
+  { label: 'Concept gallery', href: '#work' },
   { label: 'Approach', href: '#process' },
   { label: 'About', href: '#about' },
   { label: 'FAQs', href: '#faq' },
@@ -89,7 +89,7 @@ const initialQuote = {
 function Logo({ compact = false }) {
   return (
     <a className={`brand ${compact ? 'brand-compact' : ''}`} href="#home" aria-label="D-SIGN DESIGNERS, back to top">
-      <img src="/dsign-logo-original.png" alt="D-SIGN DESIGNERS" width="1844" height="785" />
+      <img src="/dsign-logo-dark.png" alt="D-SIGN DESIGNERS" width="1330" height="542" decoding="async" />
     </a>
   );
 }
@@ -184,7 +184,7 @@ function Header({ activeSection }) {
 
 function BrowserMockup() {
   return (
-    <div className="hero-visual" aria-label="Sample website designs and interactive dashboard illustrations">
+    <div className="hero-visual" role="group" aria-label="Illustrative website design preview">
       <div className="hero-rings" aria-hidden="true" />
       <div className="visual-dots" aria-hidden="true" />
       <div className="browser-window">
@@ -218,7 +218,7 @@ function BrowserMockup() {
 function Hero() {
   return (
     <section className="hero section-dark" id="home" aria-labelledby="hero-title">
-      <div className="hero-noise" aria-hidden="true" />
+      <div className="hero-noise" aria-hidden="true" /><div className="hero-orb hero-orb-one" aria-hidden="true" /><div className="hero-orb hero-orb-two" aria-hidden="true" />
       <div className="hero-grid container">
         <div className="hero-content">
           <div className="hero-topline"><span className="status-pulse" /> INDEPENDENT DIGITAL DESIGN & DEVELOPMENT STUDIO</div>
@@ -355,7 +355,7 @@ function Portfolio() {
     };
     window.addEventListener('keydown', onKey);
     return () => { document.body.classList.remove('dialog-open'); window.removeEventListener('keydown', onKey); };
-  }, [selected, shown.length]);
+  }, [Boolean(selected)]);
   return <section className="portfolio-section section-dark" id="work" aria-labelledby="work-title">
     <div className="container">
       <div className="work-heading-row"><div id="work-title"><SectionHeading light eyebrow="EXPLORE THE GALLERY" title="Ideas worth" emphasis="bringing to life." text="Browse our original design studies across websites, stores and applications. These are visual concepts, not commissioned client work." /></div><div className="concept-disclaimer reveal"><Sparkles size={17}/><span>Original concepts · Not client case studies</span></div></div>
@@ -403,6 +403,7 @@ function FAQ() {
 function Contact({ selectedProjectType }) {
   const [form, setForm] = useState(initialQuote);
   const [status, setStatus] = useState('');
+  const [preparedLink, setPreparedLink] = useState('');
   useEffect(() => { if (selectedProjectType) setForm(previous => ({...previous, projectType: selectedProjectType})); }, [selectedProjectType]);
   const onChange = event => setForm(prev => ({...prev, [event.target.name]: event.target.value}));
   const submit = event => {
@@ -419,10 +420,9 @@ function Contact({ selectedProjectType }) {
       `Requirements: ${form.details.trim()}`
     ].join('\n');
     const url = whatsappLink(message);
-    setStatus('Your WhatsApp message has been prepared. If the new tab did not open, please allow pop-ups or use the direct WhatsApp button.');
-    const opened = window.open(url, '_blank');
-    if (opened) opened.opener = null;
-    else window.location.assign(url);
+    setPreparedLink(url);
+    setStatus('Your WhatsApp message is ready. If it did not open automatically, use the prepared-message link below.');
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   return <section className="contact-section section-dark" id="contact"><div className="container">
@@ -434,7 +434,7 @@ function Contact({ selectedProjectType }) {
         <div className="form-row"><label>Contact number<input name="phone" value={form.phone} onChange={onChange} type="tel" placeholder="Your preferred number" maxLength={35} autoComplete="tel"/></label><label>Project type<select name="projectType" value={form.projectType} onChange={onChange}><option>Marketing / Business website</option><option>E-commerce website</option><option>Custom web application</option><option>Website redesign</option><option>Maintenance / support</option><option>Not sure yet</option></select></label></div>
         <div className="form-row"><label>Estimated budget<select name="budget" value={form.budget} onChange={onChange}><option>Need guidance</option><option>Under LKR 100,000</option><option>LKR 100,000 – 250,000</option><option>LKR 250,000 – 500,000</option><option>LKR 500,000+</option></select></label><label>Ideal timeframe<select name="timeframe" value={form.timeframe} onChange={onChange}><option>Flexible</option><option>As soon as possible</option><option>Within 1 month</option><option>1–3 months</option><option>3+ months</option></select></label></div>
         <label>Tell us about your project <span>*</span><textarea name="details" value={form.details} onChange={onChange} placeholder="What are you building? What would you like your website or application to do?" rows={4} minLength={10} maxLength={1600} required/></label>
-        <button type="submit" className="button button-primary form-submit"><span>Send enquiry via WhatsApp</span><ArrowUpRight size={19}/></button><p className="form-privacy"><LockKeyhole size={13}/> No account needed. Your details are only included in the WhatsApp message you choose to send.</p>{status && <p className="form-status" role="status">{status}</p>}
+        <button type="submit" className="button button-primary form-submit"><span>Send enquiry via WhatsApp</span><ArrowUpRight size={19}/></button><p className="form-privacy"><LockKeyhole size={13}/> No account needed. Your details are only included in the WhatsApp message you choose to send.</p>{status && <p className="form-status" role="status">{status}</p>}{preparedLink && <a className="prepared-whatsapp" href={preparedLink} target="_blank" rel="noopener noreferrer">Open your prepared WhatsApp message <ArrowUpRight size={15}/></a>}
       </form>
     </div>
   </div></section>;
@@ -453,6 +453,100 @@ function BackToTop() {
 
 function Footer() {
   return <footer className="footer section-dark"><div className="container"><div className="footer-top"><div className="footer-brand"><Logo compact/><p>We design for you,<br/>for your requirements.</p></div><div className="footer-nav"><div><span>EXPLORE</span><a href="#services">Services</a><a href="#work">Our work</a><a href="#process">Our process</a><a href="#about">About us</a></div><div><span>GET IN TOUCH</span><a href="tel:+94701188941">{BUSINESS_PHONE}</a><a href={whatsappLink()} target="_blank" rel="noopener noreferrer">WhatsApp <ArrowUpRight size={13}/></a><a href="#contact">Request a quote</a></div></div></div><div className="footer-bottom"><span>© {new Date().getFullYear()} D-SIGN DESIGNERS. All rights reserved.</span><span>DESIGN · DEVELOPMENT · DIGITAL EXPERIENCES</span><a href="#home">Back to top <ArrowUpRight size={13}/></a></div></div></footer>;
+}
+
+
+/** A self-hosted original ambient soundtrack. Browser autoplay policies are respected. */
+function AmbientPlayer() {
+  const audioRef = useRef(null);
+  const [playback, setPlayback] = useState('waiting');
+  const [unavailable, setUnavailable] = useState(false);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return undefined;
+    let mounted = true;
+    audio.volume = 0.43;
+    const onPlaying = () => { if (mounted) setPlayback('playing'); };
+    const onPause = () => { if (mounted) setPlayback(prev => prev === 'playing' ? 'paused' : prev); };
+    const onError = () => { if (mounted) { setUnavailable(true); setPlayback('paused'); } };
+    audio.addEventListener('playing', onPlaying);
+    audio.addEventListener('pause', onPause);
+    audio.addEventListener('error', onError);
+    let preference = 'auto';
+    try { preference = localStorage.getItem('dsign-ambient-audio') || 'auto'; } catch { /* Browsers may disable storage. */ }
+    if (preference === 'off') {
+      setPlayback('paused');
+    } else {
+      // Autoplay is requested as instructed, but usually needs a user gesture.
+      audio.play().then(() => {
+        if (mounted) setPlayback('playing');
+      }).catch(() => {
+        if (mounted) setPlayback('blocked');
+      });
+    }
+    return () => {
+      mounted = false;
+      audio.pause();
+      audio.removeEventListener('playing', onPlaying);
+      audio.removeEventListener('pause', onPause);
+      audio.removeEventListener('error', onError);
+    };
+  }, []);
+
+  const toggle = async () => {
+    const audio = audioRef.current;
+    if (!audio || unavailable) return;
+    if (!audio.paused) {
+      audio.pause();
+      setPlayback('paused');
+      try { localStorage.setItem('dsign-ambient-audio', 'off'); } catch { /* Private mode. */ }
+      return;
+    }
+    try {
+      await audio.play();
+      setPlayback('playing');
+      try { localStorage.setItem('dsign-ambient-audio', 'on'); } catch { /* Private mode. */ }
+    } catch {
+      setPlayback('blocked');
+    }
+  };
+  const playing = playback === 'playing';
+  const hint = unavailable ? 'Audio unavailable' : playing ? 'Pause peaceful music' : playback === 'blocked' ? 'Tap to start peaceful music' : 'Play peaceful music';
+  return (
+    <div className={`ambient-control ${playing ? 'ambient-playing' : ''}`}>
+      <audio ref={audioRef} src="/audio/quiet-horizons.mp3" loop preload="auto" aria-hidden="true" />
+      <button type="button" className="ambient-button" onClick={toggle} disabled={unavailable} aria-label={hint} aria-pressed={playing} title={hint}>
+        {playing ? <Volume2 size={19} aria-hidden="true" /> : <VolumeX size={19} aria-hidden="true" />}
+        <span className="ambient-bars" aria-hidden="true"><i /><i /><i /></span>
+      </button>
+      <span className="ambient-tooltip" aria-hidden="true">{playing ? 'Calm mode on' : playback === 'blocked' ? 'Tap for ambient sound' : unavailable ? 'Music unavailable' : 'Ambient sound off'}</span>
+    </div>
+  );
+}
+
+function ReadingProgress() {
+  const [progress, setProgress] = useState(0);
+  useEffect(() => {
+    let frame = 0;
+    const calculate = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        const scrollable = Math.max(1, document.documentElement.scrollHeight - innerHeight);
+        setProgress(Math.min(100, Math.max(0, scrollY / scrollable * 100)));
+        frame = 0;
+      });
+    };
+    calculate();
+    window.addEventListener('scroll', calculate, { passive: true });
+    window.addEventListener('resize', calculate);
+    return () => {
+      window.removeEventListener('scroll', calculate);
+      window.removeEventListener('resize', calculate);
+      cancelAnimationFrame(frame);
+    };
+  }, []);
+  return <div className="reading-progress" aria-hidden="true"><span style={{width: `${progress}%`}} /></div>;
 }
 
 export default function App() {
@@ -477,5 +571,5 @@ export default function App() {
     items.forEach(item => observer.observe(item));
     return () => observer.disconnect();
   }, []);
-  return <><a href="#main-content" className="skip-link">Skip to content</a><Header activeSection={activeSection}/><main id="main-content"><Hero/><Ticker/><Services/><BenefitBar/><IdeaStudio onStartProject={setSelectedProjectType}/><Portfolio/><Process/><About/><FAQ/><Contact selectedProjectType={selectedProjectType}/></main><Footer/><BackToTop/></>;
+  return <><a href="#main-content" className="skip-link">Skip to content</a><ReadingProgress/><Header activeSection={activeSection}/><main id="main-content"><Hero/><Ticker/><Services/><BenefitBar/><IdeaStudio onStartProject={setSelectedProjectType}/><Portfolio/><Process/><About/><FAQ/><Contact selectedProjectType={selectedProjectType}/></main><Footer/><AmbientPlayer/><BackToTop/></>;
 }

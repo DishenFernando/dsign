@@ -1,3 +1,7 @@
+# Latest upgrade: v3 (23 November 2026)
+
+For the transparent logo, ambient music control, and interactive design updates, read **V3_UPGRADE_GUIDE.md**. The page remains a static React/Vite project, with original self-hosted audio and no new npm dependencies.
+
 # D-SIGN DESIGNERS — React + Vite Agency Website
 
 A custom-built, premium responsive marketing website for **D-SIGN DESIGNERS**.

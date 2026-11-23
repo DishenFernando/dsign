@@ -36,3 +36,13 @@ Review on a live development server before deploying. This checklist documents e
 - [ ] Confirm business phone `+94 70 118 8941`, WhatsApp link and all service copy.
 - [ ] Confirm portfolio clearly describes mockups as fictional design concepts.
 - [ ] Confirm preview image and metadata after Vercel deployment, and set your canonical domain.
+
+## V3 sound and brand checks
+
+- [ ] Header/footer logo has no rectangular white box at mobile or desktop sizes.
+- [ ] Social share asset uses transparent dark-theme wordmark.
+- [ ] Tap music control: the original instrumental plays; tap again to pause.
+- [ ] If autoplay is blocked, the icon lets the visitor play with one click.
+- [ ] After pausing, reload: audio remains off until opted in again.
+- [ ] Audio file `/audio/quiet-horizons.mp3` loads without a 404 on Vercel.
+- [ ] Quote pop-ups blocked: prepared WhatsApp link remains available.

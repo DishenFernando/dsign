@@ -10,18 +10,18 @@ A custom-built, premium responsive marketing website for **D-SIGN DESIGNERS**.
 ## What's included
 
 - React 19 + Vite 6 with clean, editable source code
-- Original D-SIGN logo and local SVG design assets
+- Your supplied D-SIGN DESIGNERS logo, original matching favicon, branded social preview and nine optimized WebP concept images
 - Premium navy/blue responsive visual system
 - Sticky navigation, mobile menu, anchor navigation, active-section highlighting
 - Custom hero with a layered browser illustration, subtle floating UI and mobile mockup
-- Marketing websites, e-commerce and custom application service panels
+- Marketing websites, e-commerce and custom application service panels with original concept imagery
 - SEO/security/performance/hosting feature grid
-- Filterable portfolio previews clearly labeled as **concepts**, not client work
-- Process, about, technology stack, FAQ accordion and contact sections
+- Nine filterable image-gallery concept previews, with an accessible full-size lightbox (clearly labeled **concepts**, not client work)
+- Interactive project planner with enquiry prefill; process, about, technology stack, FAQ accordion and contact sections
 - Project enquiry form that generates a detailed WhatsApp message
 - Search metadata, social preview image, business structured data, robots.txt
 - Vercel deployment config and defensive response headers
-- Reduced-motion handling, semantic markup and keyboard navigation
+- Reduced-motion handling, semantic markup, improved mobile navigation, keyboard navigation and back-to-top button
 
 ## Local setup
 
@@ -31,6 +31,8 @@ Requirements: Node.js 20.19+ or 22.x and npm.
 npm install
 npm run dev
 ```
+
+Run `npm run check:assets` to verify bundled media and `npm run check` to verify media and production build.
 
 Open the URL printed by Vite (typically `http://localhost:5173`).
 
@@ -63,12 +65,14 @@ No server, database, environment variables or API keys are necessary for this in
 | WhatsApp number | `src/App.jsx` (`WHATSAPP_NUMBER`) |
 | Telephone display | `src/App.jsx` (`BUSINESS_PHONE`) |
 | Services and descriptions | `src/App.jsx` (`services` array) |
-| Portfolio mockups | `src/App.jsx` (`projects` array) |
+| Portfolio concepts and lightbox | `src/App.jsx` (`projects` array and `Portfolio` component) |
+| Portfolio imagery | `public/images/concepts/*.webp` |
+| Interactive planner | `src/App.jsx` (`ideaChoices` and `IdeaStudio`) |
 | Delivery process | `src/App.jsx` (`steps` array) |
 | FAQs | `src/App.jsx` (`faqs` array) |
 | Brand colors and styling | `src/styles.css` (`:root`) |
-| Logo | `public/dsign-logo.svg` |
-| Favicon | `public/favicon.svg` |
+| Supplied original logo | `public/dsign-logo-original.png` |
+| Active favicon | `public/favicon.png` |
 | Search and social previews | `index.html` and `public/og-cover.png` |
 | Vercel deployment config | `vercel.json` |
 
@@ -80,7 +84,7 @@ The client can provide their name, business, optional phone, project type, tenta
 
 ## Before going live
 
-- Replace the three **concept** portfolio designs with real screenshots and case studies when permitted by customers.
+- Replace the nine **concept** portfolio designs with real screenshots and case studies when permitted by customers.
 - Confirm brand/trademark availability and domain ownership.
 - Add your real website URL to `og:url` and canonical tags after domain is chosen. Prefer an absolute `https://yourdomain/...` URL for `og:image` when possible.
 - Decide whether to publish a privacy policy (especially if you add analytics, cookies or forms that store client data).
@@ -94,7 +98,7 @@ The client can provide their name, business, optional phone, project type, tenta
 ## Technology / operations notes
 
 - No paid design library or paid animation license required.
-- The ornamental motion uses CSS; reveal effects use `IntersectionObserver` and honor `prefers-reduced-motion`.
+- The ornamental motion uses CSS; the gallery can be navigated by mouse, touch controls and keyboard. Reveal effects use `IntersectionObserver` and honor `prefers-reduced-motion`.
 - `lucide-react` is used for SVG icons. Assets generated for sample designs are bundled locally, so the project does not depend on hotlinked photography.
 - The optional Google Fonts URL requires an internet connection; system font fallbacks will work without it.
 - Vercel response headers include `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options`, and a limited `Permissions-Policy`. A content security policy should be tested against fonts, scripts and other integrations before enabling.
@@ -103,3 +107,7 @@ The client can provide their name, business, optional phone, project type, tenta
 ## License
 
 This website package is prepared for use and customization by **D-SIGN DESIGNERS**. All fictional portfolio names are placeholders and must not be presented as existing paying clients.
+
+## Version 2 upgrade
+
+See `UPGRADE_GUIDE.md` for the apply instructions, feature changes, and known testing limits. See `QA_CHECKLIST.md` for pre-deployment checks.

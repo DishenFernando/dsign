@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   ArrowDown, ArrowRight, ArrowUpRight, BadgeCheck, Check, ChevronDown,
   Cloud, Code2, Compass, Database, Globe2, Headphones,
@@ -15,9 +15,10 @@ const whatsappLink = (text = 'Hello D-SIGN DESIGNERS! I would like to discuss a 
 const menuItems = [
   { label: 'Home', href: '#home' },
   { label: 'Services', href: '#services' },
-  { label: 'Work', href: '#work' },
+  { label: 'Gallery', href: '#work' },
   { label: 'Approach', href: '#process' },
   { label: 'About', href: '#about' },
+  { label: 'FAQs', href: '#faq' },
 ];
 
 const services = [
@@ -26,21 +27,21 @@ const services = [
     category: 'FOR BRANDS & BUSINESSES',
     description: 'Considered design, clear messaging, and conversion-focused pages that make a powerful first impression.',
     tags: ['Business websites', 'Landing pages', 'Portfolio websites'],
-    tone: 'blue'
+    tone: 'blue', image: '/images/concepts/modern-residence.webp'
   },
   {
     number: '02', icon: ShoppingBag, name: 'E-commerce Websites',
     category: 'FOR THE NEXT BIG SALE',
     description: 'Fast, intuitive storefronts designed to make browsing easier and the buying experience more enjoyable.',
     tags: ['Product catalogues', 'Store management', 'Checkout integrations'],
-    tone: 'violet'
+    tone: 'violet', image: '/images/concepts/everyday-objects.webp'
   },
   {
     number: '03', icon: Code2, name: 'Custom Web Applications',
     category: 'BUILT AROUND YOUR WORKFLOW',
     description: 'Purpose-built portals, dashboards and web systems that solve real business problems.',
     tags: ['Admin dashboards', 'Client portals', 'API integrations'],
-    tone: 'cyan'
+    tone: 'cyan', image: '/images/concepts/luminous-platform.webp'
   }
 ];
 
@@ -51,25 +52,17 @@ const promises = [
   { icon: Cloud, title: 'Launch & aftercare', detail: 'Domain guidance, hosting setup and clearly scoped support after launch.' },
 ];
 
+// These are fictional design concepts. Do not relabel them as client projects.
 const projects = [
-  {
-    number: '01', title: 'The Modern Spaces', type: 'Marketing',
-    subtitle: 'Architecture & brand presence',
-    category: 'Business website concept', className: 'portfolio-architecture',
-    description: 'A cinematic, editorial web experience for a modern architectural studio.'
-  },
-  {
-    number: '02', title: 'Form & Function', type: 'E-commerce',
-    subtitle: 'Contemporary homeware store',
-    category: 'E-commerce concept', className: 'portfolio-commerce',
-    description: 'A product-first shopping experience for a curated lifestyle brand.'
-  },
-  {
-    number: '03', title: 'Clarity Workspace', type: 'Web Apps',
-    subtitle: 'Operations & analytics platform',
-    category: 'Web application concept', className: 'portfolio-dashboard',
-    description: 'A cleaner way to organise information, teams and business insights.'
-  }
+  { number: '01', title: 'The Modern Spaces', type: 'Marketing', subtitle: 'Architecture & brand presence', category: 'Business website concept', image: '/images/concepts/studio-spaces.webp', description: 'An editorial website direction for a modern architecture studio.', features: ['Immersive landing page', 'Portfolio storytelling', 'Clear enquiry flow'] },
+  { number: '02', title: 'Form & Function', type: 'E-commerce', subtitle: 'Contemporary homeware store', category: 'E-commerce concept', image: '/images/concepts/nordic-objects.webp', description: 'A tactile, product-led online shopping experience for considered living.', features: ['Curated product discovery', 'Mobile-friendly collection pages', 'Thoughtful conversion journeys'] },
+  { number: '03', title: 'Clarity Workspace', type: 'Web Apps', subtitle: 'Operations & analytics platform', category: 'Web application concept', image: '/images/concepts/digital-flux.webp', description: 'An intuitive dashboard direction that makes complex information easier to navigate.', features: ['Role-based journeys', 'Data visualisation', 'Organised workflows'] },
+  { number: '04', title: 'Horizon Residences', type: 'Marketing', subtitle: 'Premium real estate experience', category: 'Property website concept', image: '/images/concepts/horizon-villa.webp', description: 'A sophisticated property showcase designed around imagery and clear next steps.', features: ['Property storytelling', 'Responsive galleries', 'Lead generation'] },
+  { number: '05', title: 'Atelier Living', type: 'E-commerce', subtitle: 'Refined lifestyle collection', category: 'Online store concept', image: '/images/concepts/atelier-interiors.webp', description: 'A warm, minimalist shopping direction for premium interior products.', features: ['Product collections', 'Editorial storytelling', 'Shopping experience'] },
+  { number: '06', title: 'Flux Analytics', type: 'Web Apps', subtitle: 'Insights & decision platform', category: 'Dashboard concept', image: '/images/concepts/luminous-platform.webp', description: 'A data-led web application direction with a clear, confident visual language.', features: ['Custom dashboard layouts', 'API-ready interactions', 'Accessible navigation'] },
+  { number: '07', title: 'Northline Studio', type: 'Marketing', subtitle: 'Interior architecture presence', category: 'Studio website concept', image: '/images/concepts/modern-residence.webp', description: 'A visual-first studio website concept that balances imagery and meaningful content.', features: ['Service storytelling', 'Project showcases', 'Enquiry pathways'] },
+  { number: '08', title: 'Everyday Edit', type: 'E-commerce', subtitle: 'Design-led product boutique', category: 'Retail concept', image: '/images/concepts/everyday-objects.webp', description: 'An inviting storefront concept with a visual product discovery experience.', features: ['Collection browsing', 'Product highlights', 'Streamlined mobile layout'] },
+  { number: '09', title: 'Cloudline Console', type: 'Web Apps', subtitle: 'Business management workspace', category: 'SaaS interface concept', image: '/images/concepts/cloud-workspace.webp', description: 'A streamlined workspace direction for everyday business operations.', features: ['Modular components', 'Organised information', 'Scalable interface patterns'] }
 ];
 
 const steps = [
@@ -96,7 +89,7 @@ const initialQuote = {
 function Logo({ compact = false }) {
   return (
     <a className={`brand ${compact ? 'brand-compact' : ''}`} href="#home" aria-label="D-SIGN DESIGNERS, back to top">
-      <img src="/dsign-logo.svg" alt="D-SIGN DESIGNERS" />
+      <img src="/dsign-logo-original.png" alt="D-SIGN DESIGNERS" width="1844" height="785" />
     </a>
   );
 }
@@ -126,6 +119,8 @@ function SectionHeading({ eyebrow, title, emphasis, text, light = false }) {
 function Header({ activeSection }) {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const menuButtonRef = useRef(null);
+  const navigationRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 30);
@@ -140,10 +135,29 @@ function Header({ activeSection }) {
   }, [isOpen]);
 
   useEffect(() => {
-    const onKey = (event) => { if (event.key === 'Escape') setIsOpen(false); };
+    if (!isOpen) return undefined;
+    const navigation = navigationRef.current;
+    const firstLink = navigation?.querySelector('a');
+    firstLink?.focus();
+    const onKey = (event) => {
+      if (event.key === 'Escape') {
+        setIsOpen(false);
+        menuButtonRef.current?.focus();
+      }
+      if (event.key === 'Tab' && navigation) {
+        const links = [...navigation.querySelectorAll('a')];
+        if (!links.length) return;
+        const first = links[0];
+        const last = links[links.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+        if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+      }
+    };
+    const onResize = () => { if (window.innerWidth > 960) setIsOpen(false); };
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, []);
+    window.addEventListener('resize', onResize);
+    return () => { window.removeEventListener('keydown', onKey); window.removeEventListener('resize', onResize); };
+  }, [isOpen]);
 
   const closeMenu = () => setIsOpen(false);
 
@@ -151,7 +165,7 @@ function Header({ activeSection }) {
     <header className={`site-header ${scrolled ? 'header-scrolled' : ''}`}>
       <div className="header-shell container">
         <Logo />
-        <nav className={`main-navigation ${isOpen ? 'navigation-open' : ''}`} aria-label="Main navigation" id="main-navigation">
+        <nav ref={navigationRef} className={`main-navigation ${isOpen ? 'navigation-open' : ''}`} aria-label="Main navigation" id="main-navigation">
           {menuItems.map(item => (
             <a key={item.href} href={item.href} className={activeSection === item.href.slice(1) ? 'active' : ''} onClick={closeMenu}>
               {item.label}
@@ -160,7 +174,7 @@ function Header({ activeSection }) {
           <a className="mobile-nav-contact" href="#contact" onClick={closeMenu}>Start a project <ArrowUpRight size={17} /></a>
         </nav>
         <a href="#contact" className="header-contact">Let's talk <ArrowUpRight size={17} /></a>
-        <button type="button" className="menu-toggle" onClick={() => setIsOpen(!isOpen)} aria-expanded={isOpen} aria-controls="main-navigation" aria-label={isOpen ? 'Close menu' : 'Open menu'}>
+        <button ref={menuButtonRef} type="button" className="menu-toggle" onClick={() => setIsOpen(!isOpen)} aria-expanded={isOpen} aria-controls="main-navigation" aria-label={isOpen ? 'Close menu' : 'Open menu'}>
           {isOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
@@ -187,7 +201,7 @@ function BrowserMockup() {
             <p>Thoughtful spaces for modern living.</p>
             <span className="mock-site-link">EXPLORE PROJECTS <ArrowRight size={11} /></span>
           </div>
-          <div className="mock-site-photo"><img src="/images/architecture.svg" alt="Architectural illustration for a sample website" /></div>
+          <div className="mock-site-photo"><img src="/images/concepts/studio-spaces.webp" alt="Architectural imagery for a fictional website concept" width="1200" height="410" fetchPriority="high" /></div>
         </div>
         <div className="mock-site-footer"><span>01 / DESIGN & EXPERIENCE</span><span>FORM FOLLOWS FEELING.</span></div>
       </div>
@@ -248,6 +262,7 @@ function Services() {
             const Icon = service.icon;
             return <article key={service.name} className={`service-card service-${service.tone} reveal delay-${i + 1}`}>
               <div className="service-top"><span className="service-icon"><Icon size={28} strokeWidth={1.5} /></span><span className="service-number">/ {service.number}</span></div>
+              <div className="service-image"><img src={service.image} alt={`${service.name} design inspiration`} loading="lazy" decoding="async" width="640" height="360" /></div>
               <div className="service-copy"><span className="card-eyebrow">{service.category}</span><h3>{service.name}</h3><p>{service.description}</p></div>
               <div className="service-tags">{service.tags.map(tag => <span key={tag}>{tag}</span>)}</div>
               <a href={whatsappLink(`Hello D-SIGN DESIGNERS! I'm interested in ${service.name}. Can we discuss my requirements?`)} target="_blank" rel="noopener noreferrer" className="service-cta" aria-label={`Discuss ${service.name} via WhatsApp`}><ArrowUpRight size={23} /></a>
@@ -274,46 +289,95 @@ function BenefitBar() {
   );
 }
 
-function WorkMockup({ project }) {
-  if (project.type === 'Marketing') {
-    return <div className="work-visual work-visual-marketing">
-      <div className="work-browser-top"><span className="small-dots">•••</span><span>the modern spaces</span><Menu size={12}/></div>
-      <div className="work-architectural"><img src="/images/architecture.svg" alt="Architectural illustration" /><div className="work-architecture-overlay"><span>EST. 2025 / THE MODERN SPACES</span><strong>Spaces that<br /><em>make a statement.</em></strong><small>SEE OUR WORK <ArrowRight size={12}/></small></div></div>
-    </div>;
-  }
-  if (project.type === 'E-commerce') {
-    return <div className="work-visual work-visual-commerce">
-      <div className="commerce-top"><strong>form<span>.</span></strong><span>SHOP &nbsp;&nbsp; THE STORY &nbsp;&nbsp; <ShoppingBag size={15}/></span></div>
-      <div className="commerce-main"><div className="commerce-product"><img src="/images/product.svg" alt="Illustration of a modern wooden chair" /></div><div className="commerce-copy"><small>COLLECTION NO. 01</small><h3>Objects for<br />everyday life.</h3><span>EXPLORE COLLECTION <ArrowUpRight size={13}/></span></div></div>
-    </div>;
-  }
-  return <div className="work-visual work-visual-app">
-    <div className="app-side"><div className="app-logo"><LayoutGrid size={18}/></div>{[LayoutGrid, TrendingUp, Database, Headphones].map((Icon, i) => <span key={i} className={i === 0 ? 'selected' : ''}><Icon size={17}/></span>)}</div>
-    <div className="app-main"><div className="app-top"><div><small>MONDAY, NOVEMBER 23</small><h3>Good morning, Alex <span>✳</span></h3></div><span className="app-avatar">A</span></div><div className="app-metric-row"><div><small>Total revenue</small><strong>$84,250</strong><span>↗ 12.8% this month</span></div><div><small>Active projects</small><strong>24</strong><span>↗ 4 new this week</span></div></div><div className="app-chart"><span>Performance overview</span><div className="app-bars">{[35,48,42,64,58,75,68,88,76,100,85,112].map((h, i) => <i key={i} style={{height: `${h}px`}}/>)}</div></div></div>
+const ideaChoices = [
+  { id: 'marketing', label: 'Business website', icon: Monitor, projectType: 'Marketing / Business website', headline: 'Make an unforgettable first impression.', copy: 'For brands that need a thoughtful online home, clear messaging and a compelling way to get in touch.', image: '/images/concepts/horizon-villa.webp', includes: ['Brand-led page design', 'SEO-friendly structure', 'Responsive experiences'] },
+  { id: 'commerce', label: 'Online store', icon: ShoppingBag, projectType: 'E-commerce website', headline: 'Turn browsing into a better buying journey.', copy: 'For businesses ready to showcase products, simplify discovery and build a store around their customers.', image: '/images/concepts/nordic-objects.webp', includes: ['Product discovery', 'Storefront experiences', 'Checkout planning'] },
+  { id: 'application', label: 'Web application', icon: LayoutGrid, projectType: 'Custom web application', headline: 'Make your everyday work feel effortless.', copy: 'For teams with specific processes that call for a purposeful, secure-minded application.', image: '/images/concepts/digital-flux.webp', includes: ['Workflow discovery', 'Role-based interfaces', 'Integration planning'] }
+];
+
+function IdeaStudio({ onStartProject }) {
+  const [selection, setSelection] = useState('marketing');
+  const selected = ideaChoices.find(item => item.id === selection);
+  return <section className="idea-section section-light" id="idea-studio" aria-labelledby="idea-title">
+    <div className="container idea-layout">
+      <div className="idea-intro reveal">
+        <Eyebrow>INTERACTIVE PROJECT PLANNER</Eyebrow>
+        <h2 id="idea-title">Not sure where to <span>start?</span></h2>
+        <p>Choose what you'd like to create. We'll show you a starting direction and carry your choice into the enquiry form.</p>
+        <div className="idea-selector" role="group" aria-label="Choose a project direction">
+          {ideaChoices.map(item => { const Icon = item.icon; return <button type="button" key={item.id} aria-pressed={selection === item.id} className={selection === item.id ? 'idea-selected' : ''} onClick={() => setSelection(item.id)}><Icon size={18}/>{item.label}<ArrowRight size={16}/></button>; })}
+        </div>
+      </div>
+      <div className="idea-result reveal" aria-live="polite" aria-atomic="true">
+        <div className="idea-result-art"><img src={selected.image} alt={`${selected.label} design concept inspiration`} loading="lazy" width="1100" height="650" /></div>
+        <div className="idea-result-copy"><span>YOUR STARTING POINT / {selected.label.toUpperCase()}</span><h3>{selected.headline}</h3><p>{selected.copy}</p><ul>{selected.includes.map(item => <li key={item}><Check size={15}/>{item}</li>)}</ul><a className="idea-link" href="#contact" onClick={() => onStartProject(selected.projectType)}>Discuss this idea <ArrowUpRight size={18}/></a></div>
+      </div>
+    </div>
+  </section>;
+}
+
+function ConceptPreview({ project }) {
+  return <div className={`concept-preview concept-${project.type.toLowerCase().replace(/[^a-z]+/g, '-')}`}>
+    <img src={project.image} alt={`${project.title}, a fictional ${project.type.toLowerCase()} design concept`} loading="lazy" decoding="async" width="1200" height="760" />
+    <div className="concept-overlay" aria-hidden="true"><span>DESIGN STUDY / {project.number}</span><strong>{project.title}</strong><span className="concept-overlay-action">EXPLORE THE CONCEPT <ArrowUpRight size={14}/></span></div>
   </div>;
 }
 
 function Portfolio() {
   const [filter, setFilter] = useState('All');
+  const [selected, setSelected] = useState(null);
+  const triggerRef = useRef(null);
+  const dialogRef = useRef(null);
+  const closeRef = useRef(null);
   const filters = ['All', 'Marketing', 'E-commerce', 'Web Apps'];
   const shown = filter === 'All' ? projects : projects.filter(project => project.type === filter);
-  return (
-    <section className="portfolio-section section-dark" id="work" aria-labelledby="work-title">
-      <div className="container">
-        <div className="work-heading-row"><div id="work-title"><SectionHeading light eyebrow="SELECTED CONCEPTS" title="A glimpse of" emphasis="what's possible." text="A few exploratory design concepts to show how we think about brand, commerce and product experiences." /></div><div className="concept-disclaimer reveal"><Sparkles size={17}/><span>Concept projects — not client case studies</span></div></div>
-        <div className="portfolio-filters" role="group" aria-label="Filter portfolio concepts">
-          {filters.map(f => <button key={f} type="button" className={filter === f ? 'selected' : ''} onClick={() => setFilter(f)} aria-pressed={filter === f}>{f}</button>)}
-        </div>
-        <div className="portfolio-grid">
-          {shown.map((project) => <article className="project-card" key={project.title}>
-            <div className="project-preview"><WorkMockup project={project}/></div>
-            <div className="project-details"><div><span>{project.category} / {project.number}</span><h3>{project.title}</h3><p>{project.subtitle}</p></div><a href={whatsappLink(`Hello D-SIGN DESIGNERS! I saw your ${project.category.toLowerCase()} (${project.title}). I'd like something similar for my business.`)} target="_blank" rel="noopener noreferrer" aria-label={`Discuss a project similar to ${project.title}`}><ArrowUpRight size={24}/></a></div>
-          </article>)}
-        </div>
-        <div className="work-footnote"><span><span className="footnote-dot"/> Your brand could be next.</span><a href="#contact">Tell us what you have in mind <ArrowRight size={16}/></a></div>
+  const openProject = (project, event) => { triggerRef.current = event.currentTarget; setSelected(project); };
+  const closeProject = () => { setSelected(null); requestAnimationFrame(() => triggerRef.current?.focus()); };
+  const goProject = (direction) => setSelected(current => {
+    const index = shown.findIndex(project => project.number === current.number);
+    return shown[(index + direction + shown.length) % shown.length];
+  });
+  useEffect(() => {
+    if (!selected) return undefined;
+    document.body.classList.add('dialog-open');
+    closeRef.current?.focus();
+    const onKey = event => {
+      if (event.key === 'Escape') { event.preventDefault(); closeProject(); }
+      if (event.key === 'ArrowLeft') { event.preventDefault(); goProject(-1); }
+      if (event.key === 'ArrowRight') { event.preventDefault(); goProject(1); }
+      if (event.key === 'Tab') {
+        const elements = [...dialogRef.current.querySelectorAll('a[href], button:not([disabled])')];
+        if (!elements.length) return;
+        const first = elements[0], last = elements[elements.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => { document.body.classList.remove('dialog-open'); window.removeEventListener('keydown', onKey); };
+  }, [selected, shown.length]);
+  return <section className="portfolio-section section-dark" id="work" aria-labelledby="work-title">
+    <div className="container">
+      <div className="work-heading-row"><div id="work-title"><SectionHeading light eyebrow="EXPLORE THE GALLERY" title="Ideas worth" emphasis="bringing to life." text="Browse our original design studies across websites, stores and applications. These are visual concepts, not commissioned client work." /></div><div className="concept-disclaimer reveal"><Sparkles size={17}/><span>Original concepts · Not client case studies</span></div></div>
+      <div className="portfolio-toolbar"><div className="portfolio-filters" role="group" aria-label="Filter gallery by project type">
+        {filters.map(f => <button key={f} type="button" className={filter === f ? 'selected' : ''} onClick={() => setFilter(f)} aria-pressed={filter === f}>{f}</button>)}
+      </div><span className="portfolio-count" role="status">SHOWING {shown.length.toString().padStart(2,'0')} / {projects.length.toString().padStart(2,'0')} CONCEPTS</span></div>
+      <div className="portfolio-grid">
+        {shown.map(project => <article className="project-card" key={project.number}>
+          <button type="button" className="project-open" onClick={event => openProject(project,event)} aria-label={`Preview ${project.title} concept`}><ConceptPreview project={project} /><span className="project-zoom"><ArrowUpRight size={21}/></span></button>
+          <div className="project-details"><div><span>{project.category} / {project.number}</span><h3>{project.title}</h3><p>{project.subtitle}</p></div><button type="button" onClick={event => openProject(project,event)} aria-label={`View details about ${project.title}`}><ArrowUpRight size={23}/></button></div>
+        </article>)}
       </div>
-    </section>
-  );
+      <div className="work-footnote"><span><span className="footnote-dot"/> Your brand could be next.</span><a href="#contact">Tell us what you have in mind <ArrowRight size={16}/></a></div>
+    </div>
+    {selected && <div className="gallery-backdrop" onMouseDown={event => { if (event.target === event.currentTarget) closeProject(); }}>
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="gallery-title" aria-describedby="gallery-description" className="gallery-dialog">
+        <button ref={closeRef} className="gallery-close" type="button" aria-label="Close project preview" onClick={closeProject}><X size={22}/></button>
+        <div className="gallery-image"><img src={selected.image} alt={`${selected.title} design inspiration`} width="1200" height="760" /></div>
+        <div className="gallery-content"><div className="gallery-meta">CONCEPT STUDY / {selected.number} &nbsp;·&nbsp; {selected.type.toUpperCase()}</div><h3 id="gallery-title">{selected.title}</h3><p id="gallery-description">{selected.description}</p><p className="gallery-note">This is an original visual concept and does not represent completed client work.</p><div className="gallery-feature-list">{selected.features.map(feature => <span key={feature}><Check size={14}/>{feature}</span>)}</div><a className="button button-primary gallery-cta" href={whatsappLink(`Hello D-SIGN DESIGNERS! I like the ${selected.title} design concept and would like to discuss something similar.`)} target="_blank" rel="noopener noreferrer">Discuss a similar project <ArrowUpRight size={18}/></a><div className="gallery-navigation"><button type="button" onClick={() => goProject(-1)}><ArrowRight size={17} className="arrow-previous"/> Previous</button><span>{shown.findIndex(item => item.number === selected.number)+1} / {shown.length}</span><button type="button" onClick={() => goProject(1)}>Next <ArrowRight size={17}/></button></div></div>
+      </div>
+    </div>}
+  </section>;
 }
 
 function Process() {
@@ -336,13 +400,14 @@ function FAQ() {
   return <section className="faq-section section-light" id="faq"><div className="container faq-grid"><div className="faq-heading"><SectionHeading eyebrow="GOOD TO KNOW" title="Questions?" emphasis="We've got answers." text="Here's what clients often want to know before getting started."/><div className="faq-cta"><MessageCircle size={22}/><div><strong>Have something else in mind?</strong><span>We're happy to talk through your idea.</span></div><a href={whatsappLink()} target="_blank" rel="noopener noreferrer" aria-label="Ask a question via WhatsApp"><ArrowUpRight size={19}/></a></div></div><div className="faq-list">{faqs.map((faq, i) => <div className={`faq-item ${open === i ? 'faq-open' : ''}`} key={faq.question}><button type="button" onClick={() => setOpen(open === i ? -1 : i)} aria-expanded={open === i} aria-controls={`faq-answer-${i}`} id={`faq-question-${i}`}><span>{faq.question}</span><ChevronDown size={20}/></button><div className="faq-answer" id={`faq-answer-${i}`} role="region" aria-labelledby={`faq-question-${i}`} hidden={open !== i}><p>{faq.answer}</p></div></div>)}</div></div></section>;
 }
 
-function Contact() {
+function Contact({ selectedProjectType }) {
   const [form, setForm] = useState(initialQuote);
   const [status, setStatus] = useState('');
+  useEffect(() => { if (selectedProjectType) setForm(previous => ({...previous, projectType: selectedProjectType})); }, [selectedProjectType]);
   const onChange = event => setForm(prev => ({...prev, [event.target.name]: event.target.value}));
   const submit = event => {
     event.preventDefault();
-    if (!form.name.trim() || !form.details.trim()) { setStatus('Please add your name and a short project description.'); return; }
+    if (!form.name.trim() || form.details.trim().length < 10) { setStatus('Please enter your name and at least 10 characters describing your project.'); return; }
     const message = [
       'Hello D-SIGN DESIGNERS! I would like a website quotation.', '',
       `Name: ${form.name.trim()}`,
@@ -375,12 +440,24 @@ function Contact() {
   </div></section>;
 }
 
+function BackToTop() {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setVisible(window.scrollY > 660);
+    onScroll();
+    window.addEventListener('scroll', onScroll, {passive: true});
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+  return <button className={`back-to-top ${visible ? 'back-to-top-visible' : ''}`} type="button" aria-label="Back to top" tabIndex={visible ? 0 : -1} onClick={() => window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })}><ArrowDown size={19}/></button>;
+}
+
 function Footer() {
   return <footer className="footer section-dark"><div className="container"><div className="footer-top"><div className="footer-brand"><Logo compact/><p>We design for you,<br/>for your requirements.</p></div><div className="footer-nav"><div><span>EXPLORE</span><a href="#services">Services</a><a href="#work">Our work</a><a href="#process">Our process</a><a href="#about">About us</a></div><div><span>GET IN TOUCH</span><a href="tel:+94701188941">{BUSINESS_PHONE}</a><a href={whatsappLink()} target="_blank" rel="noopener noreferrer">WhatsApp <ArrowUpRight size={13}/></a><a href="#contact">Request a quote</a></div></div></div><div className="footer-bottom"><span>© {new Date().getFullYear()} D-SIGN DESIGNERS. All rights reserved.</span><span>DESIGN · DEVELOPMENT · DIGITAL EXPERIENCES</span><a href="#home">Back to top <ArrowUpRight size={13}/></a></div></div></footer>;
 }
 
 export default function App() {
   const [activeSection, setActiveSection] = useState('home');
+  const [selectedProjectType, setSelectedProjectType] = useState('');
   useEffect(() => {
     const selectActive = () => {
       const ids = ['home', 'services', 'work', 'process', 'about', 'faq', 'contact'];
@@ -400,5 +477,5 @@ export default function App() {
     items.forEach(item => observer.observe(item));
     return () => observer.disconnect();
   }, []);
-  return <><a href="#main-content" className="skip-link">Skip to content</a><Header activeSection={activeSection}/><main id="main-content"><Hero/><Ticker/><Services/><BenefitBar/><Portfolio/><Process/><About/><FAQ/><Contact/></main><Footer/></>;
+  return <><a href="#main-content" className="skip-link">Skip to content</a><Header activeSection={activeSection}/><main id="main-content"><Hero/><Ticker/><Services/><BenefitBar/><IdeaStudio onStartProject={setSelectedProjectType}/><Portfolio/><Process/><About/><FAQ/><Contact selectedProjectType={selectedProjectType}/></main><Footer/><BackToTop/></>;
 }

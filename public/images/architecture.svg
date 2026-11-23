@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 720">
+<defs>
+  <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#b9dbed"/><stop offset=".53" stop-color="#dae8ed"/><stop offset="1" stop-color="#d1d9d9"/></linearGradient>
+  <linearGradient id="glass" x1="0" x2="1" y2="1"><stop stop-color="#4486a4"/><stop offset=".34" stop-color="#1c4f6e"/><stop offset=".76" stop-color="#092b43"/><stop offset="1" stop-color="#31708c"/></linearGradient>
+  <linearGradient id="glass2" x2="1" y2="1"><stop stop-color="#154d6b"/><stop offset="1" stop-color="#0e2335"/></linearGradient>
+  <linearGradient id="stone" x2="1"><stop stop-color="#c3bbb0"/><stop offset="1" stop-color="#e5ddd3"/></linearGradient>
+  <pattern id="grid" width="55" height="54" patternUnits="userSpaceOnUse"><path d="M 0 0 L0 54 M 0 0 L55 0" stroke="#bbdfed" stroke-width="2" opacity=".45"/></pattern>
+</defs>
+<rect width="840" height="720" fill="url(#sky)"/>
+<circle cx="676" cy="115" r="90" fill="#fff" opacity=".42"/>
+<path d="M0 536Q260 498 420 532T840 510V720H0" fill="#849b94" opacity=".32"/>
+<path d="M70 580L270 330L538 352L530 720H65Z" fill="url(#stone)"/>
+<path d="M250 286L540 140L825 260L535 404Z" fill="#d9d7d1"/>
+<path d="M250 286L535 404L535 720H250Z" fill="url(#glass)"/>
+<path d="M535 404L825 260V720H535Z" fill="url(#glass2)"/>
+<path d="M250 286L535 404V720H250Z" fill="url(#grid)" opacity=".85"/>
+<path d="M535 404L825 260V720H535Z" fill="url(#grid)" opacity=".66"/>
+<path d="M252 286L538 402L826 258" stroke="#d6e6ea" stroke-width="10" fill="none"/>
+<path d="M252 394L535 508L825 366M252 506L535 620L825 477M340 323V720M433 364V720M631 352V720M723 307V720" stroke="#9cc6d5" stroke-width="5" opacity=".65" fill="none"/>
+<path d="M0 662L155 621L305 650L410 627V720H0Z" fill="#2f5e51"/>
+<path d="M0 720V600" stroke="#2c5545" stroke-width="26"/><circle cx="12" cy="558" r="83" fill="#416d55"/><circle cx="62" cy="578" r="57" fill="#537d61"/>
+<path d="M829 720V580" stroke="#315f51" stroke-width="26"/><circle cx="816" cy="555" r="105" fill="#457758"/><circle cx="755" cy="602" r="72" fill="#57866a"/>
+<rect x="0" y="685" width="840" height="35" fill="#7f948f" opacity=".7"/>
+</svg>

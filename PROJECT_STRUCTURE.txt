@@ -1,0 +1,21 @@
+D-SIGN-Designers-React-Vite/
+├── .gitignore
+├── README.md
+├── VERCEL_DEPLOYMENT.md
+├── index.html
+├── package.json
+├── vercel.json
+├── vite.config.js
+├── public/
+│   ├── dsign-logo.svg
+│   ├── favicon.svg
+│   ├── og-cover.png
+│   ├── robots.txt
+│   └── images/
+│       ├── architecture.svg
+│       ├── product.svg
+│       └── abstract-lines.svg
+└── src/
+    ├── main.jsx
+    ├── App.jsx
+    └── styles.css

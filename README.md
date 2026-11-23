@@ -115,3 +115,7 @@ This website package is prepared for use and customization by **D-SIGN DESIGNERS
 ## Version 2 upgrade
 
 See `UPGRADE_GUIDE.md` for the apply instructions, feature changes, and known testing limits. See `QA_CHECKLIST.md` for pre-deployment checks.
+
+## Autoplay background music (v3.1)
+
+The original quiet ambient track starts automatically **with sound when the browser permits it**. Browsers commonly prohibit audible autoplay before user interaction; in that case, the first click, tap, or eligible keystroke anywhere on the website starts the music. Visitors can use the bottom-left speaker icon to mute or unmute it. Their choice is retained on refresh. The setting uses browser local storage (no cookies or external tracking).

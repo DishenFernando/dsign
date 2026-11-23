@@ -456,71 +456,177 @@ function Footer() {
 }
 
 
-/** A self-hosted original ambient soundtrack. Browser autoplay policies are respected. */
+/**
+ * Local, original ambient soundtrack. Request audible autoplay immediately, then
+ * retry on the first real user gesture if the browser blocks autoplay with sound.
+ * Muting is a preference, not a pause: the track continues silently and loops.
+ */
 function AmbientPlayer() {
   const audioRef = useRef(null);
-  const [playback, setPlayback] = useState('waiting');
+  const [muted, setMuted] = useState(() => {
+    try {
+      // Preserve the visitor's explicit "off" preference from website v3.
+      return ['off', 'muted'].includes(localStorage.getItem('dsign-ambient-audio'));
+    } catch {
+      return false;
+    }
+  });
+  const [playback, setPlayback] = useState('starting');
   const [unavailable, setUnavailable] = useState(false);
 
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return undefined;
-    let mounted = true;
-    audio.volume = 0.43;
-    const onPlaying = () => { if (mounted) setPlayback('playing'); };
-    const onPause = () => { if (mounted) setPlayback(prev => prev === 'playing' ? 'paused' : prev); };
-    const onError = () => { if (mounted) { setUnavailable(true); setPlayback('paused'); } };
+    let active = true;
+    audio.volume = 0.36;
+    audio.muted = muted;
+
+    const onPlaying = () => {
+      if (!active) return;
+      setPlayback('playing');
+      removeGestureListeners();
+    };
+    const onPause = () => {
+      if (active) {
+        setPlayback('paused');
+        addGestureListeners();
+      }
+    };
+    const onError = () => {
+      if (!active) return;
+      setUnavailable(true);
+      setPlayback('unavailable');
+      removeGestureListeners();
+    };
+
+    // Calling play() directly in the event handler matters: the browser must
+    // recognise this as a genuine click/tap/keyboard user activation.
+    const requestPlayback = () => {
+      if (!active || audio.error || !audio.paused) return;
+      try {
+        const result = audio.play();
+        if (result && typeof result.catch === 'function') {
+          result.catch(() => {
+            if (active && !audio.error && audio.paused) setPlayback('blocked');
+          });
+        }
+      } catch {
+        if (active) setPlayback('blocked');
+      }
+    };
+
+    const onFirstGesture = (event) => {
+      if (event.target?.closest?.('.ambient-control')) return;
+      if (event.type === 'keydown' && (
+        event.key === 'Tab' || event.key === 'Escape' ||
+        event.altKey || event.ctrlKey || event.metaKey || event.repeat
+      )) return;
+      requestPlayback();
+    };
+    // All supported inputs; clicking the sound control is handled by the
+    // button itself, so it never unexpectedly flips the visitor's preference.
+    const addGestureListeners = () => {
+      document.addEventListener('pointerdown', onFirstGesture, true);
+      document.addEventListener('click', onFirstGesture, true);
+      document.addEventListener('keydown', onFirstGesture, true);
+      document.addEventListener('touchstart', onFirstGesture, true);
+    };
+    const removeGestureListeners = () => {
+      document.removeEventListener('pointerdown', onFirstGesture, true);
+      document.removeEventListener('click', onFirstGesture, true);
+      document.removeEventListener('keydown', onFirstGesture, true);
+      document.removeEventListener('touchstart', onFirstGesture, true);
+    };
+
     audio.addEventListener('playing', onPlaying);
     audio.addEventListener('pause', onPause);
     audio.addEventListener('error', onError);
-    let preference = 'auto';
-    try { preference = localStorage.getItem('dsign-ambient-audio') || 'auto'; } catch { /* Browsers may disable storage. */ }
-    if (preference === 'off') {
-      setPlayback('paused');
-    } else {
-      // Autoplay is requested as instructed, but usually needs a user gesture.
-      audio.play().then(() => {
-        if (mounted) setPlayback('playing');
-      }).catch(() => {
-        if (mounted) setPlayback('blocked');
-      });
-    }
+    addGestureListeners();
+    requestPlayback(); // Audible on load whenever the browser permits it.
+
     return () => {
-      mounted = false;
+      active = false;
+      removeGestureListeners();
       audio.pause();
       audio.removeEventListener('playing', onPlaying);
       audio.removeEventListener('pause', onPause);
       audio.removeEventListener('error', onError);
     };
-  }, []);
+  }, []); // Initial preference is read before first render.
 
-  const toggle = async () => {
+  const toggleSound = () => {
     const audio = audioRef.current;
     if (!audio || unavailable) return;
-    if (!audio.paused) {
-      audio.pause();
-      setPlayback('paused');
-      try { localStorage.setItem('dsign-ambient-audio', 'off'); } catch { /* Private mode. */ }
+
+    if (audio.muted) {
+      audio.muted = false;
+      setMuted(false);
+      try { localStorage.setItem('dsign-ambient-audio', 'on'); } catch { /* Storage optional. */ }
+    } else if (!audio.paused) {
+      audio.muted = true;
+      setMuted(true);
+      try { localStorage.setItem('dsign-ambient-audio', 'muted'); } catch { /* Storage optional. */ }
       return;
     }
-    try {
-      await audio.play();
-      setPlayback('playing');
-      try { localStorage.setItem('dsign-ambient-audio', 'on'); } catch { /* Private mode. */ }
-    } catch {
-      setPlayback('blocked');
+
+    // If a browser blocked autoplay, the visitor can still use this icon
+    // directly. play() must be initiated in the click handler.
+    if (audio.paused) {
+      setPlayback('starting');
+      try {
+        const result = audio.play();
+        if (result && typeof result.catch === 'function') {
+          result.catch(() => setPlayback('blocked'));
+        }
+      } catch {
+        setPlayback('blocked');
+      }
     }
   };
-  const playing = playback === 'playing';
-  const hint = unavailable ? 'Audio unavailable' : playing ? 'Pause peaceful music' : playback === 'blocked' ? 'Tap to start peaceful music' : 'Play peaceful music';
+
+  const audible = playback === 'playing' && !muted;
+  const hint = unavailable
+    ? 'Background music unavailable'
+    : muted
+      ? 'Unmute peaceful background music'
+      : playback === 'blocked' || playback === 'paused'
+        ? 'Play peaceful background music'
+        : 'Mute peaceful background music';
+
   return (
-    <div className={`ambient-control ${playing ? 'ambient-playing' : ''}`}>
-      <audio ref={audioRef} src="/audio/quiet-horizons.mp3" loop preload="auto" aria-hidden="true" />
-      <button type="button" className="ambient-button" onClick={toggle} disabled={unavailable} aria-label={hint} aria-pressed={playing} title={hint}>
-        {playing ? <Volume2 size={19} aria-hidden="true" /> : <VolumeX size={19} aria-hidden="true" />}
+    <div className={`ambient-control ${audible ? 'ambient-playing' : ''}`}>
+      <audio
+        ref={audioRef}
+        src="/audio/quiet-horizons.mp3"
+        autoPlay
+        muted={muted}
+        loop
+        preload="auto"
+        aria-hidden="true"
+      />
+      <button
+        type="button"
+        className="ambient-button"
+        onClick={toggleSound}
+        disabled={unavailable}
+        aria-label={hint}
+        title={hint}
+      >
+        {muted ? <VolumeX size={19} aria-hidden="true" /> : <Volume2 size={19} aria-hidden="true" />}
         <span className="ambient-bars" aria-hidden="true"><i /><i /><i /></span>
       </button>
-      <span className="ambient-tooltip" aria-hidden="true">{playing ? 'Calm mode on' : playback === 'blocked' ? 'Tap for ambient sound' : unavailable ? 'Music unavailable' : 'Ambient sound off'}</span>
+      <span className="ambient-tooltip" aria-hidden="true">
+        {unavailable ? 'Music unavailable'
+          : muted ? 'Music muted'
+            : playback === 'blocked' || playback === 'paused' ? 'Music starts on interaction'
+              : 'Mute music'}
+      </span>
+      <span className="ambient-announcement" role="status">
+        {unavailable ? 'Background music unavailable'
+          : muted ? 'Background music muted'
+            : playback === 'blocked' ? 'The browser blocked automatic audio. Interact with the page or tap the music button to listen.'
+              : playback === 'playing' ? 'Background music playing' : ''}
+      </span>
     </div>
   );
 }

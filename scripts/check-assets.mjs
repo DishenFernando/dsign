@@ -25,7 +25,10 @@ expect(app.includes('prefers-reduced-motion'), 'Reduced-motion support missing')
 expect(app.includes('aria-modal="true"'), 'Accessible gallery dialog missing');
 expect(app.includes('wa.me/'), 'WhatsApp enquiry link missing');
 expect(app.includes('audio.play()'), 'Autoplay attempt missing');
-expect(app.includes('aria-pressed={playing}'), 'Music toggle not accessible');
+expect(app.includes('aria-label={hint}'), 'Accessible music button label missing');
+expect(app.includes('autoPlay') && app.includes('muted={muted}'), 'Audio autoplay/mute handling missing');
+expect(app.includes("document.addEventListener('pointerdown'"), 'Autoplay first-interaction fallback missing');
+expect(app.includes("localStorage.setItem('dsign-ambient-audio', 'muted')"), 'Saved music mute preference missing');
 expect(!css.includes('background: #f7fbff;\n  border: 1px solid rgba(255,255,255,.58);'), 'Old boxed brand treatment remains');
 if (failures.length) {
   console.error(failures.map(message => `FAIL: ${message}`).join('\n'));

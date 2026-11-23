@@ -41,8 +41,19 @@ Review on a live development server before deploying. This checklist documents e
 
 - [ ] Header/footer logo has no rectangular white box at mobile or desktop sizes.
 - [ ] Social share asset uses transparent dark-theme wordmark.
-- [ ] Tap music control: the original instrumental plays; tap again to pause.
-- [ ] If autoplay is blocked, the icon lets the visitor play with one click.
-- [ ] After pausing, reload: audio remains off until opted in again.
+- [ ] Tap music control while playing: the original instrumental mutes; tap again to unmute.
+- [ ] If autoplay is blocked, the first eligible page interaction or music icon starts the track.
+- [ ] After muting, reload: audio remains muted until unmuted again.
 - [ ] Audio file `/audio/quiet-horizons.mp3` loads without a 404 on Vercel.
 - [ ] Quote pop-ups blocked: prepared WhatsApp link remains available.
+
+## V3.1 audio regression tests
+
+- [ ] On Chrome/Safari/Firefox with autoplay permission granted, the sound begins automatically on page load.
+- [ ] On a new visitor session with autoplay blocked, the first page click or tap begins audio (unless previously muted).
+- [ ] Bottom-left speaker icon mutes/unmutes without resetting the track position.
+- [ ] Muting persists after a refresh; an explicit v3 pause preference is preserved as mute.
+- [ ] On a muted first visit, music stays silent until the visitor clicks Unmute.
+- [ ] Keyboard visitors can use the sound button; ARIA label announces its action.
+- [ ] The track loops without network access after it has loaded.
+- [ ] If the MP3 fails to load, the button reports an unavailable state instead of pretending music is playing.

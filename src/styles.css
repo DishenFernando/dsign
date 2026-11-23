@@ -765,6 +765,8 @@ body { overflow-x: clip; }
 .ambient-playing .ambient-bars i:nth-child(2) { animation-delay: -.8s; }
 .ambient-playing .ambient-bars i:nth-child(3) { animation-delay: -.43s; }
 @keyframes audioBar { 50% { height: 14px; } }
+/* Announce audio status to screen readers without adding intrusive UI text. */
+.ambient-announcement { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
 .ambient-tooltip { position: absolute; pointer-events: none; left: calc(100% + 10px); top: 50%; transform: translate(-5px,-50%); white-space: nowrap; font-size: 11px; font-weight: 700; letter-spacing: .02em; color: #e5f5ff; background: rgba(9,34,54,.92); border: 1px solid rgba(98,179,222,.22); border-radius: 10px; padding: 9px 11px; opacity: 0; transition: opacity .2s, transform .2s; }
 .ambient-control:hover .ambient-tooltip, .ambient-control:focus-within .ambient-tooltip { opacity: 1; transform: translate(0,-50%); }
 @media (max-width: 960px) {
